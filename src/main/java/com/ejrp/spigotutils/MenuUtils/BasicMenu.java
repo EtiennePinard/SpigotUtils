@@ -121,7 +121,7 @@ public class BasicMenu extends Menu {
      * Sets the parent of this menu.
      * @param parent The new parent of this menu
      */
-    public void setParent(@Nullable BasicMenu parent) { this.parent = parent; }
+    public void setParent(@Nullable Menu parent) { this.parent = parent; }
 
     /**
      * Gets the parent of this menu
