@@ -1,4 +1,3 @@
-#Spigot Utils
 Spigot Utils is a library to aid you in Spigot plugin development. 
 It currently contains some command utilities, menu utilities and item utilities.
 If you want to use this library in your plugin, you will have to clone this repo 
