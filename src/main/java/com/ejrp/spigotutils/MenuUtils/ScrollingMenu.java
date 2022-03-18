@@ -343,6 +343,12 @@ public class ScrollingMenu extends Menu {
      */
     public void setParent(Menu parent) { this.parent = parent; }
 
+    /**
+     * Gets the parent of this menu
+     * @return The parent of this menu
+     */
+    @Nullable public Menu getParent() { return this.parent; }
+
     private int getHighestIndex() {
         return items.keySet().stream()
                 .reduce((integer, integer2) -> integer >= integer2 ? integer : integer2)
