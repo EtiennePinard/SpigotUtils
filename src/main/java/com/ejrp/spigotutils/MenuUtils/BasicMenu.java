@@ -129,7 +129,16 @@ public class BasicMenu extends Menu {
      */
     @Nullable public Menu getParent() { return this.parent; }
 
+    /**
+     * Sets the code to be executed when the player clicks on his inventory when he is viewing this menu.
+     * @param lowerInventoryListener The listener to be invoked when the player clicks on his inventory when he is viewing this menu.
+     */
     public void setLowerInventoryListener(Consumer<InventoryClickEvent> lowerInventoryListener) { this.lowerInventoryListener = lowerInventoryListener; }
+
+    /**
+     * Gets the listener to be invoked when the player clicks on his inventory when he is viewing this one
+     * @return The listener to be invoked when the player clicks on his inventory when he is viewing this one
+     */
     public Consumer<InventoryClickEvent> getLowerInventoryListener() { return this.lowerInventoryListener; }
 
     /**

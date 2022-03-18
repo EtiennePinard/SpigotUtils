@@ -32,12 +32,12 @@ public class ScrollingMenu extends Menu {
     private final String name;
     private final int size;
     private final Inventory inventory;
-    private final Consumer<InventoryClickEvent> lowerInventoryListener;
+    private Consumer<InventoryClickEvent> lowerInventoryListener;
     private final Map<Integer, MenuItem> items;
     private Menu parent;
 
     private int lineScrolledOnScroll;
-    private final Material scrollMaterial;
+    private Material scrollMaterial;
     private ItemStack scrollUpItem;
     private ItemStack scrollDownItem;
     private InventoryCorner scrollUpInventoryCorner;
@@ -338,16 +338,40 @@ public class ScrollingMenu extends Menu {
     public void setResetOnClose(boolean resetOnClose) { this.resetOnClose = resetOnClose; }
 
     /**
+     * Gets if this inventory goes back to line 0 on close.
+     * @return If this inventory goes back to line 0 on close.
+     */
+    public boolean isResetOnClose() { return resetOnClose; }
+
+    /**
      * Sets the parent of this inventory
      * @param parent The parent of this inventory
      */
-    public void setParent(Menu parent) { this.parent = parent; }
+    public void setParent(@Nullable Menu parent) { this.parent = parent; }
 
     /**
      * Gets the parent of this menu
      * @return The parent of this menu
      */
     @Nullable public Menu getParent() { return this.parent; }
+
+    /**
+     * Sets the code to be executed when the player clicks on his inventory when he is viewing this menu.
+     * @param lowerInventoryListener The listener to be invoked when the player clicks on his inventory when he is viewing this menu.
+     */
+    public void setLowerInventoryListener(Consumer<InventoryClickEvent> lowerInventoryListener) { this.lowerInventoryListener = lowerInventoryListener; }
+
+    /**
+     * Sets the material to use for the scroll up or down buttons
+      * @param scrollMaterial The material to be used for the scroll up or down buttons
+     */
+    public void setScrollMaterial(Material scrollMaterial) { this.scrollMaterial = scrollMaterial; }
+
+    /**
+     * Gets the material to be used for the scroll up or down buttons
+     * @return The material to be used for the scroll up or down buttons
+     */
+    public Material getScrollMaterial() { return scrollMaterial; }
 
     private int getHighestIndex() {
         return items.keySet().stream()
