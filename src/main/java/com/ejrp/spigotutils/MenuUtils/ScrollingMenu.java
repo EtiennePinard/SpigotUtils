@@ -229,14 +229,20 @@ public class ScrollingMenu extends Menu {
      */
     public void scrollDown(@Nullable Player player) {
         if (!this.canScroll(ScrollDirection.DOWN)) {
+            Sound sound = cannotScrollSound;
+            if (this.lineScrolledOnScroll > 0) {
+                // Cannot scroll because the line scrolled on scroll is too big but there is still space
+                this.lineScrolledOnScroll = 0;
+                sound = scrollSound;
+            }
             if (player != null)
-                player.playSound(player.getLocation(), cannotScrollSound, 25.0F, 50.0F);
+                player.playSound(player.getLocation(), sound, 25.0F, 50.0F);
         } else {
             this.lineWeAreOn = this.lineWeAreOn + lineScrolledOnScroll;
             if (player != null)
                 player.playSound(player.getLocation(), scrollSound, 50.0F, 50.0F);
-            updateInventory();
         }
+        updateInventory();
     }
 
     /**
@@ -250,14 +256,20 @@ public class ScrollingMenu extends Menu {
      */
     public void scrollUp(@Nullable Player player) {
         if (!this.canScroll(ScrollDirection.UP)) {
+            Sound sound = cannotScrollSound;
+            if (this.lineScrolledOnScroll < (Math.ceil((double) this.getHighestIndex() / (double) 9))) {
+                // Cannot scroll because the line scrolled on scroll is too big but there is still space
+                this.lineScrolledOnScroll = (int) Math.ceil((double) this.getHighestIndex() / (double) 9);
+                sound = scrollSound;
+            }
             if (player != null)
-                player.playSound(player.getLocation(), cannotScrollSound, 25.0F, 50.0F);
+                player.playSound(player.getLocation(), sound, 50.0F, 50.0F);
         } else {
             this.lineWeAreOn = this.lineWeAreOn - lineScrolledOnScroll;
             if (player != null)
                 player.playSound(player.getLocation(), scrollSound, 50.0F, 50.0F);
-            updateInventory();
         }
+        updateInventory();
     }
 
     /**
@@ -279,7 +291,7 @@ public class ScrollingMenu extends Menu {
     public boolean canScroll(@NotNull ScrollDirection direction) {
         switch(direction) {
             case DOWN: return (Math.ceil((double) this.getHighestIndex() / (double) 9)) >= (this.lineWeAreOn + size() / 9 + lineScrolledOnScroll);
-            case UP: return this.lineWeAreOn != 0;
+            case UP: return (this.lineWeAreOn - lineScrolledOnScroll) >= 0;
             default: return false;
         }
     }
@@ -291,10 +303,12 @@ public class ScrollingMenu extends Menu {
     public Map<Integer, MenuItem> getItems() { return items; }
 
     /**
-     * Sets the line scrolled on scroll. If you set this value too high that you may not be able to scroll at all.
+     * Sets the line scrolled on scroll.
+     * You will always be able to scroll to the bottom of the inventory or the top, no matter how big this value is.
+     * This will set the absolute value of the value passed.
      * @param lineScrolledOnScroll The line scrolled on scroll
      */
-    public void setLineScrolledOnScroll(int lineScrolledOnScroll) { this.lineScrolledOnScroll = lineScrolledOnScroll; }
+    public void setLineScrolledOnScroll(int lineScrolledOnScroll) { this.lineScrolledOnScroll = Math.abs(lineScrolledOnScroll); }
 
     /**
      * Gets the line scrolled on scroll.
@@ -366,7 +380,7 @@ public class ScrollingMenu extends Menu {
     }
 
     /**
-     * The four corners of an inventory.
+     * Represents the four corners of an inventory.
      */
     public enum InventoryCorner {
         TOP_LEFT(0,1),
