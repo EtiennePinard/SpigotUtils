@@ -228,21 +228,16 @@ public class ScrollingMenu extends Menu {
      * @param player The player to play the sound.
      */
     public void scrollDown(@Nullable Player player) {
-        if (!this.canScroll(ScrollDirection.DOWN)) {
-            Sound sound = cannotScrollSound;
-            if (this.lineScrolledOnScroll > 0) {
-                // Cannot scroll because the line scrolled on scroll is too big but there is still space
-                this.lineScrolledOnScroll = 0;
-                sound = scrollSound;
-            }
+        int scrollAmount = this.remainingScrollAmount(ScrollDirection.DOWN);
+        if (scrollAmount == 0) {
             if (player != null)
-                player.playSound(player.getLocation(), sound, 25.0F, 50.0F);
+                player.playSound(player.getLocation(), cannotScrollSound, 25.0F, 50.0F);
         } else {
-            this.lineWeAreOn = this.lineWeAreOn + lineScrolledOnScroll;
+            this.lineWeAreOn += scrollAmount;
             if (player != null)
                 player.playSound(player.getLocation(), scrollSound, 50.0F, 50.0F);
+            updateInventory();
         }
-        updateInventory();
     }
 
     /**
@@ -255,21 +250,16 @@ public class ScrollingMenu extends Menu {
      * @param player The player to play the sound
      */
     public void scrollUp(@Nullable Player player) {
-        if (!this.canScroll(ScrollDirection.UP)) {
-            Sound sound = cannotScrollSound;
-            if (this.lineScrolledOnScroll < (Math.ceil((double) this.getHighestIndex() / (double) 9))) {
-                // Cannot scroll because the line scrolled on scroll is too big but there is still space
-                this.lineScrolledOnScroll = (int) Math.ceil((double) this.getHighestIndex() / (double) 9);
-                sound = scrollSound;
-            }
+        int scrollAmount = this.remainingScrollAmount(ScrollDirection.UP);
+        if (scrollAmount == 0) {
             if (player != null)
-                player.playSound(player.getLocation(), sound, 50.0F, 50.0F);
+                player.playSound(player.getLocation(), cannotScrollSound, 50.0F, 50.0F);
         } else {
-            this.lineWeAreOn = this.lineWeAreOn - lineScrolledOnScroll;
+            this.lineWeAreOn -= scrollAmount;
             if (player != null)
                 player.playSound(player.getLocation(), scrollSound, 50.0F, 50.0F);
+            updateInventory();
         }
-        updateInventory();
     }
 
     /**
@@ -279,20 +269,21 @@ public class ScrollingMenu extends Menu {
 
     public void goToLine(int lineToGoTo) {
         if (lineToGoTo > (getHighestIndex() / 9) || lineToGoTo < 0)
-            throw new IllegalArgumentException("You can only have go to a line between 0 and the line of the highest item index which in this case is " + getHighestIndex() / 9);
+            throw new IllegalArgumentException("You can only have go to a line between 0 and the line of the highest item index which in this case is " + getHighestIndex() / 9 + 1);
         this.lineWeAreOn = lineToGoTo;
     }
 
     /**
-     * If it is possible to scroll in the specified direction
+     * The maximum amount you can scroll in one direction.
+     * The maximum you can scroll in any direction is the lineScrolledOnScroll parameter and the minimum is 0.
      * @param direction The direction to scroll in
      * @return If you can scroll in the specified direction
      */
-    public boolean canScroll(@NotNull ScrollDirection direction) {
+    public int remainingScrollAmount(@NotNull ScrollDirection direction) {
         switch(direction) {
-            case DOWN: return (Math.ceil((double) this.getHighestIndex() / (double) 9)) >= (this.lineWeAreOn + size() / 9 + lineScrolledOnScroll);
-            case UP: return (this.lineWeAreOn - lineScrolledOnScroll) >= 0;
-            default: return false;
+            case DOWN: return Math.min(lineScrolledOnScroll, this.getHighestIndex() / 9 + 1 - (lineWeAreOn + size / 9));
+            case UP: return lineWeAreOn - lineScrolledOnScroll < 0 ? lineWeAreOn : lineScrolledOnScroll;
+            default: return 0;
         }
     }
 
@@ -359,11 +350,11 @@ public class ScrollingMenu extends Menu {
     }
 
     private void updateButtons() {
-        String displayNameUp = this.canScroll(ScrollDirection.UP) ?
+        String displayNameUp = this.remainingScrollAmount(ScrollDirection.UP) > 0 ?
                 ChatColor.YELLOW + "Scroll Up" :
                 ChatColor.GRAY + "Cannot Scroll Up!";
 
-        String displayNameDown = this.canScroll(ScrollDirection.DOWN) ?
+        String displayNameDown = this.remainingScrollAmount(ScrollDirection.DOWN) > 0 ?
                 ChatColor.YELLOW + "Scroll Down" :
                 ChatColor.GRAY + "Cannot Scroll Down!";
 
