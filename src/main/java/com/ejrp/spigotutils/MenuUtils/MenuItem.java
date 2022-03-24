@@ -32,7 +32,7 @@ public class MenuItem {
      * Creates a new Menu Item object with an empty consumer
      * @param item The item that will be displayed
      */
-    public MenuItem(ItemStack item) { this(item,null); }
+    public MenuItem(@NotNull ItemStack item) { this(item,null); }
 
     /**
      * Gets the item of this Menu Item object
