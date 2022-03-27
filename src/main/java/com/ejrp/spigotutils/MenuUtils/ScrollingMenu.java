@@ -215,7 +215,9 @@ public class ScrollingMenu extends Menu {
                 updateInventory();
             }
             if (parent != null)
-                event.getPlayer().openInventory(parent.getInventory());
+                Bukkit.getScheduler().runTaskLater(getPlugin(),
+                        () -> event.getPlayer().openInventory(parent.getInventory()),
+                        1);
         }
     }
 
