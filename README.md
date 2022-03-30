@@ -2,10 +2,22 @@
 
 Spigot Utils is a library to aid you in Spigot plugin development. 
 It currently contains some command utilities, menu utilities and item utilities.
-If you want to use this library in your plugin, you will have to clone this repo 
-and run maven clean install to install this jar to your local maven repo.
-This will install the jar with the source code and the javadocs.
+If you want to use this library in your plugin, you will have to either clone this repo 
+and run mvn clean install or download the jars in the release and add them to your local maven repo.
+You can now add the Spigot Utils dependency to your project!
 
+## Add Spigot Utils to your project
+
+Once you have added the jars in your local maven repository, 
+here is how you can add the Spigot Utils dependency to your poject.
+
+```xml
+<dependency>
+    <groupId>com.ejrp</groupId>
+    <artifactId>SpigotUtils</artifactId>
+    <version>1.0</version>
+</dependency>
+```
 
 ## Code examples: 
 
