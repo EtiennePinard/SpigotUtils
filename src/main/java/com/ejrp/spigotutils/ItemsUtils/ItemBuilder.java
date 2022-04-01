@@ -19,8 +19,8 @@ import java.util.function.Consumer;
  */
 public class ItemBuilder {
 
-    private final ItemStack item;
-    private final ItemMeta meta;
+    @NotNull private final ItemStack item;
+    @NotNull private final ItemMeta meta;
 
     /**
      * Creates a new instance of the custom item class with the specified parameter.
@@ -35,51 +35,49 @@ public class ItemBuilder {
      * Creates a new instance of the custom item class with the specified type and an amount of one.
      * @param type The type of the item.
      */
-    public ItemBuilder(Material type) {
-        this(new ItemStack(type));
-    }
+    public ItemBuilder(Material type) { this(new ItemStack(type)); }
 
     /**
      * Sets the type of this custom item
      * @param type The new type of this custom item
      * @return The current object for method chaining
      */
-    public ItemBuilder setMaterial(Material type) { item.setType(type); return this; }
+    @NotNull public ItemBuilder setMaterial(Material type) { item.setType(type); return this; }
 
     /**
      * Sets the amount of the item
      * @param amount The new amount of the item
      * @return The current object for method chaining
      */
-    public ItemBuilder setItemAmount(int amount) { item.setAmount(amount); return this; }
+    @NotNull public ItemBuilder setItemAmount(int amount) { item.setAmount(amount); return this; }
 
     /**
      * Sets the display name of this custom item
      * @param displayName The new display name of this custom item
      * @return The current object for method chaining
      */
-    public ItemBuilder setDisplayName(String displayName) { meta.setDisplayName(displayName); return this; }
+    @NotNull public ItemBuilder setDisplayName(String displayName) { meta.setDisplayName(displayName); return this; }
 
     /**
      * Sets the lore of this custom item
      * @param lore The new lore of this custom item
      * @return The current object for method chaining
      */
-    public ItemBuilder setLore(List<String> lore) { meta.setLore(lore); return this; }
+    @NotNull public ItemBuilder setLore(List<String> lore) { meta.setLore(lore); return this; }
 
     /**
      * Sets the lore of this custom item
      * @param lines The new lore of this custom item
      * @return The current object for method chaining
      */
-    public ItemBuilder setLore(String... lines) { return setLore(Arrays.asList(lines)); }
+    @NotNull public ItemBuilder setLore(String... lines) { return setLore(Arrays.asList(lines)); }
 
     /**
      * Adds an item flag to this custom item
      * @param itemFlags The item flags to add to this custom item
      * @return The current object for method chaining
      */
-    public ItemBuilder addItemFlags(ItemFlag... itemFlags) { meta.addItemFlags(itemFlags); return this; }
+    @NotNull public ItemBuilder addItemFlags(ItemFlag... itemFlags) { meta.addItemFlags(itemFlags); return this; }
 
     /**
      * Adds an enchantment to this custom item
@@ -88,14 +86,17 @@ public class ItemBuilder {
      * @param ignoreLevelRestriction If the enchantment should ignore the default minecraft level restriction
      * @return The current object for method chaining
      */
-    public ItemBuilder addEnchants(Enchantment enchantment, int level, boolean ignoreLevelRestriction) { meta.addEnchant(enchantment,level,ignoreLevelRestriction); return this; }
+    @NotNull public ItemBuilder addEnchants(Enchantment enchantment, int level, boolean ignoreLevelRestriction) {
+        meta.addEnchant(enchantment,level,ignoreLevelRestriction);
+        return this;
+    }
 
     /**
      * Modify this item in the way you want!
      * @param consumer The consumer that will modify this item
      * @return The current object for method chaining
      */
-    public ItemBuilder modifyItem(@NotNull Consumer<ItemStack> consumer)  {
+    @NotNull public ItemBuilder modifyItem(@NotNull Consumer<ItemStack> consumer)  {
         consumer.accept(item);
         return this;
     }
@@ -105,7 +106,7 @@ public class ItemBuilder {
      * @param consumer The consumer that will modify the item meta
      * @return The current object for method chaining
      */
-    public ItemBuilder modifyMeta(@NotNull Consumer<ItemMeta> consumer) {
+    @NotNull public ItemBuilder modifyMeta(@NotNull Consumer<ItemMeta> consumer) {
         consumer.accept(meta);
         return this;
     }
@@ -114,12 +115,12 @@ public class ItemBuilder {
      * Gets the meta of this item
      * @return The meta of this item
      */
-    public ItemMeta getItemMeta() { return meta; }
+    @NotNull  public ItemMeta getItemMeta() { return meta; }
 
     /**
      * Gets the item and sets the item meta on the item.
      * @return The item with the current item meta.
      */
-    public ItemStack getItem() { item.setItemMeta(meta); return item; }
+    @NotNull public ItemStack getItem() { item.setItemMeta(meta); return item; }
 
 }

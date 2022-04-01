@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,14 +26,11 @@ import java.util.function.Consumer;
  * You can set the line that you start at using the goToLine() method.
  * Scrolling up means going to higher index and scrolling down means going to lower index.
  */
-public class ScrollingMenu extends Menu {
+public class StaticScrollingMenu extends StaticMenu {
 
-    private final String name;
-    private final int size;
-    private final Inventory inventory;
     private Consumer<InventoryClickEvent> lowerInventoryListener;
     private final Map<Integer, MenuItem> items;
-    private Menu parent;
+    private StaticMenu parent;
 
     private int lineScrolledOnScroll;
     private Material scrollMaterial;
@@ -66,23 +62,17 @@ public class ScrollingMenu extends Menu {
      * @throws IllegalArgumentException If the size is invalid, if the line scrolled on scroll is invalid,
      * if the inventory are corner are the same, or they are the same side when the inventory size is 9.
      */
-    public ScrollingMenu(@NotNull JavaPlugin plugin,
-                         @NotNull String name, int size,
-                         @Nullable Consumer<InventoryClickEvent> lowerInventoryListener,
-                         @Nullable Map<Integer, MenuItem> items,
-                         @Nullable Menu parent,
-                         int lineScrolledOnScroll,
-                         @NotNull Material scrollMaterial,
-                         @NotNull InventoryCorner scrollUpInventoryCorner,
-                         @NotNull InventoryCorner scrollDownInventoryCorner,
-                         @Nullable Sound scrollSound, @Nullable Sound cannotScrollSound, boolean resetOnClose)
-    throws IllegalArgumentException {
-        super(plugin);
-        if (size % 9 != 0 || size < 9 || size > 54)
-            throw new IllegalArgumentException("The size is not a multiple of nine between 9 and 54!");
-        this.name = name;
-        this.size = size;
-        this.inventory = Bukkit.createInventory(null,this.size,this.name);
+    public StaticScrollingMenu(@NotNull JavaPlugin plugin,
+                               @NotNull String name, int size,
+                               @Nullable Consumer<InventoryClickEvent> lowerInventoryListener,
+                               @Nullable Map<Integer, MenuItem> items,
+                               @Nullable StaticMenu parent,
+                               int lineScrolledOnScroll,
+                               @NotNull Material scrollMaterial,
+                               @NotNull InventoryCorner scrollUpInventoryCorner,
+                               @NotNull InventoryCorner scrollDownInventoryCorner,
+                               @Nullable Sound scrollSound, @Nullable Sound cannotScrollSound, boolean resetOnClose) {
+        super(plugin, name, size);
         this.lowerInventoryListener = lowerInventoryListener != null ? lowerInventoryListener : event -> {};
         this.parent = parent;
 
@@ -121,8 +111,8 @@ public class ScrollingMenu extends Menu {
      * @param name The name of this menu
      * @param size The size of this menu. Keep in mind that the inventory will keep the same size has you scroll.
      */
-    public ScrollingMenu(@NotNull JavaPlugin plugin,
-                         @NotNull String name, int size) {
+    public StaticScrollingMenu(@NotNull JavaPlugin plugin,
+                               @NotNull String name, int size) {
         this(plugin,name,size,
                 null, null,null, 1,
                 Material.LADDER,InventoryCorner.TOP_RIGHT, InventoryCorner.BOTTOM_RIGHT,
@@ -132,7 +122,7 @@ public class ScrollingMenu extends Menu {
     @Override
     public void openTo(@NotNull Player... players) {
         for (Player player : players)
-            player.openInventory(inventory);
+            player.openInventory(getInventory());
     }
 
     @Override
@@ -164,9 +154,9 @@ public class ScrollingMenu extends Menu {
                 // and index is not bigger than the highest line that is being shown
                 contents[index - 9 * lineWeAreOn] = menuItem.getItem();
         }));
-        contents[scrollDownInventoryCorner.getIndex(size)] = scrollDownItem;
-        contents[scrollUpInventoryCorner.getIndex(size)] = scrollUpItem;
-        this.inventory.setContents(contents);
+        contents[scrollDownInventoryCorner.getIndex(size())] = scrollDownItem;
+        contents[scrollUpInventoryCorner.getIndex(size())] = scrollUpItem;
+        this.getInventory().setContents(contents);
     }
 
     /**
@@ -220,10 +210,6 @@ public class ScrollingMenu extends Menu {
                         1);
         }
     }
-
-    @Override public int size() { return size; }
-    @Override public String name() { return name; }
-    @NotNull @Override public Inventory getInventory() { return inventory; }
 
     /**
      * Scrolls the inventory down and plays the scroll or the cannotScroll sound.
@@ -283,7 +269,7 @@ public class ScrollingMenu extends Menu {
      */
     public int remainingScrollAmount(@NotNull ScrollDirection direction) {
         switch(direction) {
-            case DOWN: return Math.min(lineScrolledOnScroll, this.getHighestIndex() / 9 + 1 - (lineWeAreOn + size / 9));
+            case DOWN: return Math.min(lineScrolledOnScroll, this.getHighestIndex() / 9 + 1 - (lineWeAreOn + size() / 9));
             case UP: return lineWeAreOn - lineScrolledOnScroll < 0 ? lineWeAreOn : lineScrolledOnScroll;
             default: return 0;
         }
@@ -349,13 +335,13 @@ public class ScrollingMenu extends Menu {
      * Sets the parent of this inventory
      * @param parent The parent of this inventory
      */
-    public void setParent(@Nullable Menu parent) { this.parent = parent; }
+    public void setParent(@Nullable StaticMenu parent) { this.parent = parent; }
 
     /**
      * Gets the parent of this menu
      * @return The parent of this menu
      */
-    @Nullable public Menu getParent() { return this.parent; }
+    @Nullable public StaticMenu getParent() { return this.parent; }
 
     /**
      * Sets the code to be executed when the player clicks on his inventory when he is viewing this menu.

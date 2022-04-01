@@ -4,7 +4,9 @@ import com.ejrp.spigotutils.ItemsUtils.ItemBuilder;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ import java.util.List;
  */
 public class MenuList {
 
-    private final List<Menu> menus;
+    private final List<StaticMenu> staticMenus;
     private final ItemStack next;
     private final ItemStack back;
 
@@ -27,9 +29,9 @@ public class MenuList {
      * Creates a new instance of MenuChain
      * @param next The material for the next "button"
      * @param back The material for the back "button"
-     * @param menus The menus of this chain
+     * @param staticMenus The menus of this chain
      */
-    public MenuList(Material next, Material back, @Nullable List<Menu> menus) {
+    public MenuList(Material next, Material back, @Nullable List<StaticMenu> staticMenus) {
         this.next = new ItemBuilder(next)
                 .setDisplayName(ChatColor.GRAY + "Next")
                 .getItem();
@@ -38,7 +40,7 @@ public class MenuList {
                 .setDisplayName(ChatColor.GRAY + "Back")
                 .getItem();
 
-        this.menus = menus != null ? menus : new ArrayList<>();
+        this.staticMenus = staticMenus != null ? staticMenus : new ArrayList<>();
         this.updateMenus();
     }
 
@@ -47,35 +49,55 @@ public class MenuList {
      * @param index The index of the menu to add
      * @param menu The menu to add
      */
-    public void addMenu(int index, BasicMenu menu) { this.menus.add(index, menu); updateMenus(); }
+    public void addMenu(int index, BasicMenu menu) { this.staticMenus.add(index, menu); updateMenus(); }
 
     /**
      * Adds a menu at the end of the list of menus
      * @param menu The menu to add
      */
-    public void addMenu(BasicMenu menu) { addMenu(menus.size(),menu); }
+    public void addMenu(BasicMenu menu) { addMenu(staticMenus.size(),menu); }
 
     private void updateMenus() {
 
-        for (int index = 0; index < this.menus.size(); index++) {
-            Menu menu = this.menus.get(index);
-            menu.setBypassCloseEvent(true);
-            int lastSlot = menu.size() - 1;
-            Menu next = this.menus.size() == index + 1 ? menu : this.menus.get(index + 1);
-            Menu back = index == 0 ? menu : this.menus.get(index - 1);
+        for (int index = 0; index < this.staticMenus.size(); index++) {
+            StaticMenu staticMenu = this.staticMenus.get(index);
+            staticMenu.setBypassCloseEvent(true);
+            int lastSlot = staticMenu.size() - 1;
+            StaticMenu next = this.staticMenus.size() == index + 1 ? staticMenu : this.staticMenus.get(index + 1);
+            StaticMenu back = index == 0 ? staticMenu : this.staticMenus.get(index - 1);
 
             // Setting the back and the next item to the bottom right and left corner
-            if (menus.size() - 1 > index && index > 0) {
-                menu.addItem(lastSlot - 8, new MenuItem(this.back, event ->
-                        back.openTo((Player) event.getWhoClicked())));
-                menu.addItem(lastSlot, new MenuItem(this.next, event ->
-                        next.openTo((Player) event.getWhoClicked())));
+            if (staticMenus.size() - 1 > index && index > 0) {
+                staticMenu.addItem(lastSlot - 8, new MenuItem(this.back) {
+                    @Override
+                    public void clicked(@NotNull InventoryClickEvent event) {
+                        if (event.getWhoClicked() instanceof Player)
+                        back.openTo((Player) event.getWhoClicked());
+                    }
+                });
+                staticMenu.addItem(lastSlot, new MenuItem(this.next) {
+                    @Override
+                    public void clicked(@NotNull InventoryClickEvent event) {
+                        if (event.getWhoClicked() instanceof Player)
+                            next.openTo((Player) event.getWhoClicked());
+                    }
+                });
             } else if (index == 0) {
-                menu.addItem(lastSlot, new MenuItem(this.next, event ->
-                        next.openTo((Player) event.getWhoClicked())));
+                staticMenu.addItem(lastSlot, new MenuItem(this.next) {
+                    @Override
+                    public void clicked(@NotNull InventoryClickEvent event) {
+                        if (event.getWhoClicked() instanceof Player)
+                            next.openTo((Player) event.getWhoClicked());
+                    }
+                });
             } else {
-                menu.addItem(lastSlot - 8, new MenuItem(this.back, event ->
-                        back.openTo((Player) event.getWhoClicked())));
+                staticMenu.addItem(lastSlot - 8, new MenuItem(this.back) {
+                    @Override
+                    public void clicked(@NotNull InventoryClickEvent event) {
+                        if (event.getWhoClicked() instanceof Player)
+                            back.openTo((Player) event.getWhoClicked());
+                    }
+                });
             }
         }
     }
@@ -86,11 +108,11 @@ public class MenuList {
      * @return The menu at the specific location in the list.
      * @throws IndexOutOfBoundsException If the index is out of bounds
      */
-    public Menu getInventoryAt(int index) throws IndexOutOfBoundsException { return this.menus.get(index); }
+    public StaticMenu getInventoryAt(int index) throws IndexOutOfBoundsException { return this.staticMenus.get(index); }
 
     /**
      * Gets the list of Menus that this MenuList has.
      * @return The list of Menus that this MultiMenu has.
      */
-    public List<Menu> getMenus() { return this.menus; }
+    public List<StaticMenu> getMenus() { return this.staticMenus; }
 }

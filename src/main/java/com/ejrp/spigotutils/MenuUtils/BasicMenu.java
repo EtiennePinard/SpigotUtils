@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -22,14 +21,11 @@ import java.util.function.Consumer;
  * When this inventory is closed, the parent menu inventory will be opened
  * only if the parent menu is not null.
  */
-public class BasicMenu extends Menu {
+public class BasicMenu extends StaticMenu {
 
-    private final String name;
-    private final int size;
-    private final Inventory inventory;
-    private Consumer<InventoryClickEvent> lowerInventoryListener;
-    private final MenuItem[] items;
-    private Menu parent;
+    @NotNull private Consumer<InventoryClickEvent> lowerInventoryListener;
+    @NotNull private final MenuItem[] items;
+    @Nullable private StaticMenu parent;
 
     /**
      * Creates a new BasicMenu with the specified parameters
@@ -46,14 +42,12 @@ public class BasicMenu extends Menu {
                      int size,
                      @Nullable Consumer<InventoryClickEvent> lowerInventoryListener,
                      @Nullable Map<Integer, MenuItem> items,
-                     @Nullable Menu parent) throws IllegalArgumentException {
-        super(plugin);
+                     @Nullable StaticMenu parent) throws IllegalArgumentException {
+        super(plugin, name, size);
         if (size % 9 != 0 || size < 9 || size > 54)
             throw new IllegalArgumentException("The size is not a multiple of nine between 9 and 54!");
-        this.name = name;
-        this.size = size;
         this.lowerInventoryListener = lowerInventoryListener != null ? lowerInventoryListener : event -> {};
-        this.items = new MenuItem[this.size];
+        this.items = new MenuItem[size()];
         if (items != null)
             items.forEach((integer, menuItem) -> {
                 if (integer < size && integer >= 0)
@@ -62,7 +56,6 @@ public class BasicMenu extends Menu {
                     throw new IllegalArgumentException("You can only have items between the 0 and the inventory size - 1!");
             });
         this.parent = parent;
-        this.inventory = Bukkit.createInventory(null, size, this.name);
     }
 
     /**
@@ -93,7 +86,7 @@ public class BasicMenu extends Menu {
     @Override
     public void openTo(@NotNull Player... players) {
         for (Player player : players)
-            player.openInventory(this.inventory);
+            player.openInventory(getInventory());
     }
 
     @Override
@@ -104,42 +97,39 @@ public class BasicMenu extends Menu {
 
     @Override
     public void updateInventory() {
-        ItemStack[] contents = new ItemStack[size];
+        ItemStack[] contents = new ItemStack[size()];
         for (int i = 0; i < items.length; i++) {
             if (items[i] != null)
                 contents[i] = items[i].getItem();
         }
-        inventory.setContents(contents);
+        getInventory().setContents(contents);
     }
 
-    @Override @NotNull public Inventory getInventory() { return this.inventory; }
-    @Override public int size() { return this.size; }
-    @Override public String name() { return this.name; }
     @NotNull public MenuItem[] getItems() { return this.items; }
 
     /**
      * Sets the parent of this menu.
      * @param parent The new parent of this menu
      */
-    public void setParent(@Nullable Menu parent) { this.parent = parent; }
+    public void setParent(@Nullable StaticMenu parent) { this.parent = parent; }
 
     /**
      * Gets the parent of this menu
      * @return The parent of this menu
      */
-    @Nullable public Menu getParent() { return this.parent; }
+    @Nullable public StaticMenu getParent() { return this.parent; }
 
     /**
      * Sets the code to be executed when the player clicks on his inventory when he is viewing this menu.
      * @param lowerInventoryListener The listener to be invoked when the player clicks on his inventory when he is viewing this menu.
      */
-    public void setLowerInventoryListener(Consumer<InventoryClickEvent> lowerInventoryListener) { this.lowerInventoryListener = lowerInventoryListener; }
+    public void setLowerInventoryListener(@NotNull Consumer<InventoryClickEvent> lowerInventoryListener) { this.lowerInventoryListener = lowerInventoryListener; }
 
     /**
      * Gets the listener to be invoked when the player clicks on his inventory when he is viewing this one
      * @return The listener to be invoked when the player clicks on his inventory when he is viewing this one
      */
-    public Consumer<InventoryClickEvent> getLowerInventoryListener() { return this.lowerInventoryListener; }
+    @NotNull public Consumer<InventoryClickEvent> getLowerInventoryListener() { return this.lowerInventoryListener; }
 
     /**
      * Invokes the clicked() method if the player clicked a menu item
@@ -147,7 +137,7 @@ public class BasicMenu extends Menu {
      * @param event The inventory click event that has just happened.
      */
     @Override
-    public void onClick(@NotNull InventoryClickEvent event) {
+     public void onClick(@NotNull InventoryClickEvent event) {
         if (event.getClickedInventory() == null) return;
         if (!(event.getWhoClicked() instanceof Player)) return;
 
