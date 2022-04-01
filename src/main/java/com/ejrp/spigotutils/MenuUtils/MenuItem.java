@@ -6,8 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents an item in a menu. It has an item that will be displayed in the inventory.
- * You need to override the clicked method in order to instantiate this class.
- * It is up to the implementation of the inventory to decide if they should use the clicked method or not.
+ * You can override the clicked method to set the code to run when this item is clicked.
+ * Please note that it is up to the implementation of the inventory to execute the clicked
+ * method or not.
  */
 public abstract class MenuItem {
 
@@ -29,6 +30,6 @@ public abstract class MenuItem {
      * Applies the listener of this menu item
      * @param event The event that was passed when the player clicked on this item.
      */
-    public abstract void clicked(@NotNull InventoryClickEvent event);
+    public void clicked(@NotNull InventoryClickEvent event) { }
 
 }
