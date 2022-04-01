@@ -35,7 +35,7 @@ public class BasicMenu extends StaticMenu {
      * @param lowerInventoryListener The code to execute when the player is clicked when he is viewing this inventory
      * @param items The items contained in this inventory
      * @param parent The parent of this menu. This menu will open when this one is clicked.
-     * @throws IllegalArgumentException If the size is not a multiple of nine between 9 and 54 or if an index of an item is invalid.
+     * @throws IllegalArgumentException If an index of an item is invalid.
      */
     public BasicMenu(@NotNull JavaPlugin plugin,
                      String name,
@@ -44,16 +44,13 @@ public class BasicMenu extends StaticMenu {
                      @Nullable Map<Integer, MenuItem> items,
                      @Nullable StaticMenu parent) throws IllegalArgumentException {
         super(plugin, name, size);
-        if (size % 9 != 0 || size < 9 || size > 54)
-            throw new IllegalArgumentException("The size is not a multiple of nine between 9 and 54!");
         this.lowerInventoryListener = lowerInventoryListener != null ? lowerInventoryListener : event -> {};
         this.items = new MenuItem[size()];
         if (items != null)
-            items.forEach((integer, menuItem) -> {
-                if (integer < size && integer >= 0)
-                    this.items[integer] = menuItem;
-                else
+            items.forEach((slot, menuItem) -> {
+                if (slot > size && slot < 0)
                     throw new IllegalArgumentException("You can only have items between the 0 and the inventory size - 1!");
+                this.items[slot] = menuItem;
             });
         this.parent = parent;
     }
