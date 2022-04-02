@@ -1,113 +1,69 @@
 package com.ejrp.spigotutils.MenuUtils;
 
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
- * This class will register the listeners the inventory click, drag and close
- * listener. This is class is only use to quickly register Menu listeners and nothing else.
- * You can extend this class to make other menu or abstract class like I did
- * in this library (StaticMenu, DynamicMenu, ScrollingMenu)
+ * This is a specialization of the Menu class. It is a static menu,
+ * meaning that every player that uses this inventory sees the same thing.
  */
-public abstract class Menu {
+public abstract class Menu extends MenuListener {
 
-    private final JavaPlugin plugin;
-    private boolean bypassClickEvent = false;
-    private boolean bypassDragEvent = false;
-    private boolean bypassCloseEvent = false;
+    @NotNull private final Inventory inventory;
 
     /**
-     * Creates a new instance of a menu.
+     * Creates a new instance of a static menu.
      * @param plugin The plugin to register the listeners too.
+     * @param name The name of this inventory.
+     * @param size The size of this inventory.
+     * @throws IllegalArgumentException If the size is a multiple of 9 between 0 and 54
      */
-    public Menu(@NotNull JavaPlugin plugin) {
-        this.plugin = plugin;
-        plugin.getServer().getPluginManager().registerEvents(new MenuListener(this), plugin);
+    public Menu(@NotNull JavaPlugin plugin, @NotNull String name, int size, @Nullable InventoryHolder owner) {
+        super(plugin);
+        this.inventory = Bukkit.createInventory(owner,size,name);
     }
 
     /**
-     * Gets called when a click happens in an inventory
-     * @param event The inventory click event that has just happened.
+     * Adds an item to the inventory at the specified index.
+     * I made it use a menu item instead of a regular item stack
+     * because the menu item provides code when the item is clicked.
+     * @param index The index of the item
+     * @param item The item to add
+     * @throws IllegalArgumentException If the index is out of bounds
      */
-    public abstract void onClick(@NotNull InventoryClickEvent event);
+    public abstract void addItem(int index, @NotNull MenuItem item);
 
     /**
-     * Gets called when an item is dragged in an inventory.
-     * @param event The inventory drag event that has just happened.
+     * Removes an item at the specified index
+     * @param index The index of the item to remove
+     * @throws IllegalArgumentException If the index is out of bounds
      */
-    public abstract void onDrag(@NotNull InventoryDragEvent event);
+    public abstract void removeItem(int index);
 
     /**
-     * Gets called when an inventory is closed.
-     * @param event The inventory close event that has just happened.
+     * Returns the name of the inventory
+     * @return The name of the inventory
      */
-    public abstract void onExit(@NotNull InventoryCloseEvent event);
+    public final String name() { return inventory.getName(); }
 
     /**
-     * Gets the plugin that the listeners are registered to.
-     * @return The plugin that the listeners are registered to.
+     * Returns the size of the inventory
+     * @return The size of the inventory
      */
-    @NotNull public final JavaPlugin getPlugin() { return this.plugin; }
+    public final int size() { return inventory.getSize(); }
 
     /**
-     * Sets if the inventory click event should be bypassed
-     * @param bypassClickEvent If the inventory click event should be bypassed
+     * Gets the inventory
+     * @return The inventory
      */
-    public final void setBypassClickEvent(boolean bypassClickEvent) { this.bypassClickEvent = bypassClickEvent; }
+    @NotNull public final Inventory getInventory() { return inventory; }
 
     /**
-     * Sets if the inventory drag event should be bypassed
-     * @param bypassDragEvent If the inventory drag event should be bypassed
+     * Updates the contents of the inventory.
      */
-    public final void setBypassDragEvent(boolean bypassDragEvent) { this.bypassDragEvent = bypassDragEvent; }
-
-    /**
-     * Sets if the inventory close event should be bypassed
-     * @param bypassCloseEvent If the inventory close event should be bypassed
-     */
-    public final void setBypassCloseEvent(boolean bypassCloseEvent) { this.bypassCloseEvent = bypassCloseEvent; }
-
-    /**
-     * Gets if the inventory click event is bypassed
-     * @return If the inventory`click event is bypassed
-     */
-    public final boolean isBypassClickEvent() { return bypassClickEvent; }
-
-    /**
-     * Gets if the inventory drag event is bypassed
-     * @return If the inventory`drag event is bypassed
-     */
-    public final boolean isBypassDragEvent() { return bypassDragEvent; }
-
-    /**
-     * Gets if the inventory close event is bypassed
-     * @return If the inventory`close event is bypassed
-     */
-    public final boolean isBypassCloseEvent() { return bypassCloseEvent; }
-
-    /**
-     * This is the class that is used to register the inventory listener
-     * from the Menu class because you cannot register listener from an abstract class.
-     */
-    public static final class MenuListener implements Listener {
-
-        private final Menu staticMenu;
-
-        private MenuListener(Menu staticMenu) { this.staticMenu = staticMenu; }
-
-        @EventHandler
-        public void onClick(@NotNull InventoryClickEvent event) { if (!staticMenu.isBypassClickEvent()) staticMenu.onClick(event); }
-
-        @EventHandler
-        public void onDrag(@NotNull InventoryDragEvent event) { if (!staticMenu.isBypassDragEvent()) staticMenu.onDrag(event); }
-
-        @EventHandler
-        public void onExit(@NotNull final InventoryCloseEvent event) { if (!staticMenu.isBypassCloseEvent()) staticMenu.onExit(event); }
-
-    }
+    public abstract void updateInventory();
 }
