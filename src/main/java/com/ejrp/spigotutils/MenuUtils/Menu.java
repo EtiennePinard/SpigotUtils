@@ -20,6 +20,7 @@ public abstract class Menu extends MenuListener {
      * @param plugin The plugin to register the listeners too.
      * @param name The name of this inventory.
      * @param size The size of this inventory.
+     * @param owner The owner of this inventory. If null then there is no owner.
      * @throws IllegalArgumentException If the size is a multiple of 9 between 0 and 54
      */
     public Menu(@NotNull JavaPlugin plugin, @NotNull String name, int size, @Nullable InventoryHolder owner) {

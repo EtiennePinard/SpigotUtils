@@ -24,7 +24,7 @@ public abstract class MenuItem {
      * Gets the item of this Menu Item object
      * @return The item of this Menu Item object
      */
-    @NotNull public final ItemStack getItem() { return this.item; }
+    @NotNull public ItemStack getItem() { return this.item; }
 
     /**
      * Applies the listener of this menu item
