@@ -31,7 +31,28 @@ public abstract class PlayerSpecificMenu extends StaticSizeMenu {
     public PlayerSpecificMenu(@NotNull JavaPlugin plugin,
                               String name,
                               int size,
-                              @Nullable Map<Integer, MenuItem> items,
+                              @Nullable Map<Integer, ? extends MenuItem> items,
+                              @Nullable Menu parent,
+                              @NotNull UUID playerUUID) {
+        super(plugin,name,size,Bukkit.getPlayer(playerUUID),items);
+        this.parent = parent;
+        this.playerUUID = playerUUID;
+    }
+
+    /**
+     * Creates a new BasicMenu with the specified parameters
+     * @param plugin The plugin to register the listener to
+     * @param name The name of this inventory
+     * @param size The size of this inventory
+     * @param items The items contained in this inventory
+     * @param parent The parent of this menu. This menu will open when this one is clicked.
+     * @param playerUUID The UUID of the player that this inventory belongs to
+     * @throws IllegalArgumentException If an index of an item is invalid.
+     */
+    public PlayerSpecificMenu(@NotNull JavaPlugin plugin,
+                              String name,
+                              int size,
+                              @NotNull MenuItem[] items,
                               @Nullable Menu parent,
                               @NotNull UUID playerUUID) {
         super(plugin,name,size,Bukkit.getPlayer(playerUUID),items);

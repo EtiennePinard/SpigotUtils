@@ -19,7 +19,7 @@ public abstract class StaticSizeMenu extends Menu {
         this.items = items;
     }
 
-    public StaticSizeMenu(@NotNull JavaPlugin plugin, @NotNull String name, int size, @Nullable InventoryHolder owner, @Nullable Map<Integer, MenuItem> items) {
+    public StaticSizeMenu(@NotNull JavaPlugin plugin, @NotNull String name, int size, @Nullable InventoryHolder owner, @Nullable Map<Integer, ? extends MenuItem> items) {
         super(plugin, name, size, owner);
         this.items = new MenuItem[size()];
         if (items != null) items.forEach(this::addItem);
