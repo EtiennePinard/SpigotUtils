@@ -69,10 +69,9 @@ This is how to create a scrolling menu and add items to it.
 Note that an item index can be as big as it wants but bigger not smaller than 0.
 ```java
 ScrollingMenu menu = new ScrollingMenu(
-        pluginInstance,
+        pluginInstance, // The plugin instance to register the listeners
         "Example", // Name of the inventory
-        36, // Size of the inventory
-        event -> event.getWhoClicked().sendMessage("You just clicked your bottom inventory!"),
+        36, // How many item you can see at once
         new HashMap<>(), // Empty inventory for now
         null, // There is no inventory to open when this one closes
         1, // Line scolled when the player clicks the scroll button
@@ -82,16 +81,23 @@ ScrollingMenu menu = new ScrollingMenu(
         Sound.UI_BUTTON_CLICK, // Sound to play on scroll
         Sound.BLOCK_ANVIL_BREAK, // Scroll to play when you cannot scroll
         false // Do not go back to the first line when you reopen the inventory
-);
-  
-menu.addItem(10,
-        new MenuItem(new ItemStack(Material.WATER_BUCKET)) // Do nothing when this item is clicked
-);
-        
+) {
+    @Override
+    public void onPlayerInventoryClick(@NotNull InventoryClickEvent event) {
+        event.getWhoClicked().sendMessage("You just clicked your inventory while viewing this one!");
+    }
+};
+
+menu.addItem(10, // The index to add the item
+        new MenuItem(
+                new ItemStack(Material.WATER_BUCKET)) {}); 
 menu.addItem(60,
         new MenuItem(
-                new ItemStack(Material.GOLD_BLOCK),
-                event -> event.getWhoClicked().sendMessage(ChatColor.GOLD + "You found me!"))
-);
+                new ItemStack(Material.GOLD_BLOCK)) {
+    @Override
+    public void clicked(@NotNull InventoryClickEvent event) { // The code to run when you click this item
+        event.getWhoClicked().sendMessage(ChatColor.GOLD + "You found me!");
+    }
+});
 ```
 Please note that you can extend the Menu class to create your own custom menu, like a menu that can scroll sideways and upwards, for example.
