@@ -15,7 +15,7 @@ here is how you can add the Spigot Utils dependency to your poject.
 <dependency>
     <groupId>com.ejrp</groupId>
     <artifactId>SpigotUtils</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
 </dependency>
 ```
 
