@@ -74,10 +74,10 @@ ScrollingMenu menu = new ScrollingMenu(
         36, // How many item you can see at once
         new HashMap<>(), // Empty inventory for now
         null, // There is no inventory to open when this one closes
-        1, // Line scolled when the player clicks the scroll button
+        1, // Line scrolled when the player clicks the scroll button
         Material.LADDER, // The scroll button material
         ScrollingMenu.InventoryCorner.BOTTOM_RIGHT, // Scroll down button corner
-        ScrollingMenu.InventoryCorner.TOP_RIGHT, // Scroll up bottun corner
+        ScrollingMenu.InventoryCorner.TOP_RIGHT, // Scroll up botton corner
         Sound.UI_BUTTON_CLICK, // Sound to play on scroll
         Sound.BLOCK_ANVIL_BREAK, // Scroll to play when you cannot scroll
         false // Do not go back to the first line when you reopen the inventory
