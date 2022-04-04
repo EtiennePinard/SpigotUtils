@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,21 +17,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
- * This class is an implementation of a scrolling inventory.
+ * This class is an abstract implementation of an inventory that scrolls up and down.
  * This is the index 0 is at the top left, and you could go all the way to Integer.MAX_VALUE if you wanted to.
  * It starts at the top, and you can only go down at the beginning.
  * You can set the line that you start at using the goToLine() method.
  * Scrolling up means going to higher index and scrolling down means going to lower index.
  */
-public class ScrollingMenu extends Menu {
+public abstract class ScrollingMenu extends Menu {
 
-    private final String name;
-    private final int size;
-    private final Inventory inventory;
-    private Consumer<InventoryClickEvent> lowerInventoryListener;
     private final Map<Integer, MenuItem> items;
     private Menu parent;
 
@@ -53,7 +47,6 @@ public class ScrollingMenu extends Menu {
      * @param plugin The plugin to register the listeners to.
      * @param name The name of this menu
      * @param size The size of this menu. Keep in mind that the inventory will keep the same size has you scroll.
-     * @param lowerInventoryListener The listener to apply when the player clicks his inventory while viewing this one
      * @param items The items that are contained in this inventory. The index only have to be bigger than 0, if not, they will be ignored.
      * @param parent The inventory to open if when this one closes.
      * @param lineScrolledOnScroll The amount of line that are scrolled on click. So you can skip one line if you set this value to 2.
@@ -68,22 +61,14 @@ public class ScrollingMenu extends Menu {
      */
     public ScrollingMenu(@NotNull JavaPlugin plugin,
                          @NotNull String name, int size,
-                         @Nullable Consumer<InventoryClickEvent> lowerInventoryListener,
                          @Nullable Map<Integer, MenuItem> items,
                          @Nullable Menu parent,
                          int lineScrolledOnScroll,
                          @NotNull Material scrollMaterial,
                          @NotNull InventoryCorner scrollUpInventoryCorner,
                          @NotNull InventoryCorner scrollDownInventoryCorner,
-                         @Nullable Sound scrollSound, @Nullable Sound cannotScrollSound, boolean resetOnClose)
-    throws IllegalArgumentException {
-        super(plugin);
-        if (size % 9 != 0 || size < 9 || size > 54)
-            throw new IllegalArgumentException("The size is not a multiple of nine between 9 and 54!");
-        this.name = name;
-        this.size = size;
-        this.inventory = Bukkit.createInventory(null,this.size,this.name);
-        this.lowerInventoryListener = lowerInventoryListener != null ? lowerInventoryListener : event -> {};
+                         @Nullable Sound scrollSound, @Nullable Sound cannotScrollSound, boolean resetOnClose) {
+        super(plugin, name, size,null);
         this.parent = parent;
 
         if (lineScrolledOnScroll < 0)
@@ -121,40 +106,27 @@ public class ScrollingMenu extends Menu {
      * @param name The name of this menu
      * @param size The size of this menu. Keep in mind that the inventory will keep the same size has you scroll.
      */
-    public ScrollingMenu(@NotNull JavaPlugin plugin,
-                         @NotNull String name, int size) {
+    public ScrollingMenu(@NotNull JavaPlugin plugin, @NotNull String name, int size) {
         this(plugin,name,size,
-                null, null,null, 1,
+                null,null, 1,
                 Material.LADDER,InventoryCorner.TOP_RIGHT, InventoryCorner.BOTTOM_RIGHT,
                 null,null,true);
     }
 
     @Override
-    public void openTo(@NotNull Player... players) {
-        for (Player player : players)
-            player.openInventory(inventory);
-    }
-
-    @Override
-    public void closeTo(@NotNull Player... players) {
-        for (Player player : players)
-            player.closeInventory();
-    }
-
-    @Override
-    public void addItem(int index, @NotNull MenuItem item) {
+    public final void addItem(int index, @NotNull MenuItem item) {
         this.items.put(index, item);
         updateInventory();
     }
 
     @Override
-    public void removeItem(int index) {
+    public final void removeItem(int index) {
         this.items.remove(index);
         updateInventory();
     }
 
     @Override
-    public void updateInventory() {
+    public final void updateInventory() {
         updateButtons();
         ItemStack[] contents = new ItemStack[size()];
         getItems().forEach(((index, menuItem) -> {
@@ -164,26 +136,34 @@ public class ScrollingMenu extends Menu {
                 // and index is not bigger than the highest line that is being shown
                 contents[index - 9 * lineWeAreOn] = menuItem.getItem();
         }));
-        contents[scrollDownInventoryCorner.getIndex(size)] = scrollDownItem;
-        contents[scrollUpInventoryCorner.getIndex(size)] = scrollUpItem;
-        this.inventory.setContents(contents);
+        contents[scrollDownInventoryCorner.getIndex(size())] = scrollDownItem;
+        contents[scrollUpInventoryCorner.getIndex(size())] = scrollUpItem;
+        this.getInventory().setContents(contents);
     }
 
     /**
-     * If the player clicked his inventory while viewing this one, the lower listener consumer will be applied.
+     * This is the code that will be executed when the player inventory
+     * is clicked when he is viewing this inventory.
+     * Override this method if you want to execute some code when this event happens.
+     * @param event The inventory clicked event that just occurred
+     */
+    public void onPlayerInventoryClick(@NotNull InventoryClickEvent event) {}
+
+    /**
+     * If the player clicked his inventory while viewing this one the onPlayerInventoryClick() method will be invoked.
      * If the player clicked a menu item the clicked() method will be called.
      * And if the player clicked on one of the scrolled item the inventory will scroll if it can be scrolled.
      * @param event The inventory click event that has just happened.
      */
     @Override
-    public void onClick(@NotNull InventoryClickEvent event) {
+    public final void onClick(@NotNull InventoryClickEvent event) {
         if (event.getClickedInventory() == null) return;
         if (!(event.getWhoClicked() instanceof Player)) return;
 
         if (event.getInventory().equals(getInventory())) {
             event.setCancelled(true);
             if (event.getClickedInventory() instanceof PlayerInventory)
-                lowerInventoryListener.accept(event);
+                onPlayerInventoryClick(event);
             else if (event.getSlot() == scrollUpInventoryCorner.getIndex(size()))
                 scrollUp((Player) event.getWhoClicked());
             else if (event.getSlot() == scrollDownInventoryCorner.getIndex(size()))
@@ -194,11 +174,11 @@ public class ScrollingMenu extends Menu {
     }
 
     /**
-     * Cancels the event.
+     * Cancels the drag event.
      * @param event The inventory drag event that has just happened.
      */
     @Override
-    public void onDrag(@NotNull InventoryDragEvent event) {
+    public final void onDrag(@NotNull InventoryDragEvent event) {
         if (event.getInventory().equals(getInventory()))
             event.setCancelled(true);
     }
@@ -208,7 +188,7 @@ public class ScrollingMenu extends Menu {
      * @param event The inventory close event that has just happened.
      */
     @Override
-    public void onExit(@NotNull InventoryCloseEvent event) {
+    public final void onExit(@NotNull InventoryCloseEvent event) {
         if (event.getInventory().equals(getInventory())) {
             if (resetOnClose) {
                 this.lineWeAreOn = 0;
@@ -221,15 +201,11 @@ public class ScrollingMenu extends Menu {
         }
     }
 
-    @Override public int size() { return size; }
-    @Override public String name() { return name; }
-    @NotNull @Override public Inventory getInventory() { return inventory; }
-
     /**
      * Scrolls the inventory down and plays the scroll or the cannotScroll sound.
      * @param player The player to play the sound.
      */
-    public void scrollDown(@Nullable Player player) {
+    public final void scrollDown(@Nullable Player player) {
         int scrollAmount = this.remainingScrollAmount(ScrollDirection.DOWN);
         if (scrollAmount == 0) {
             if (player != null)
@@ -245,13 +221,13 @@ public class ScrollingMenu extends Menu {
     /**
      * Scroll down the inventory but the player is null so no sound.
      */
-    public void scrollDown() { this.scrollDown(null); }
+    public final void scrollDown() { this.scrollDown(null); }
 
     /**
      * Scroll up the inventory and plays the scroll or the cannotScroll sound.
      * @param player The player to play the sound
      */
-    public void scrollUp(@Nullable Player player) {
+    public final void scrollUp(@Nullable Player player) {
         int scrollAmount = this.remainingScrollAmount(ScrollDirection.UP);
         if (scrollAmount == 0) {
             if (player != null)
@@ -267,12 +243,17 @@ public class ScrollingMenu extends Menu {
     /**
      * Scroll up the inventory but the player is null so no sound.
      */
-    public void scrollUp() { this.scrollUp(null); }
+    public final void scrollUp() { this.scrollUp(null); }
 
-    public void goToLine(int lineToGoTo) {
+    /**
+     * Sets the current line to the lineToGoTo arg.
+     * @param lineToGoTo The line to go to
+     */
+    public final void goToLine(int lineToGoTo) {
         if (lineToGoTo > (getHighestIndex() / 9) || lineToGoTo < 0)
             throw new IllegalArgumentException("You can only have go to a line between 0 and the line of the highest item index which in this case is " + getHighestIndex() / 9 + 1);
         this.lineWeAreOn = lineToGoTo;
+        updateInventory();
     }
 
     /**
@@ -281,9 +262,9 @@ public class ScrollingMenu extends Menu {
      * @param direction The direction to scroll in
      * @return If you can scroll in the specified direction
      */
-    public int remainingScrollAmount(@NotNull ScrollDirection direction) {
+    public final int remainingScrollAmount(@NotNull ScrollDirection direction) {
         switch(direction) {
-            case DOWN: return Math.min(lineScrolledOnScroll, this.getHighestIndex() / 9 + 1 - (lineWeAreOn + size / 9));
+            case DOWN: return Math.min(lineScrolledOnScroll, this.getHighestIndex() / 9 + 1 - (lineWeAreOn + size() / 9));
             case UP: return lineWeAreOn - lineScrolledOnScroll < 0 ? lineWeAreOn : lineScrolledOnScroll;
             default: return 0;
         }
@@ -293,7 +274,7 @@ public class ScrollingMenu extends Menu {
      * Gets the item of this inventory. There could be negative index, that are not being displayed.
      * @return The item of this inventory
      */
-    public Map<Integer, MenuItem> getItems() { return items; }
+    public final Map<Integer, MenuItem> getItems() { return items; }
 
     /**
      * Sets the line scrolled on scroll.
@@ -301,79 +282,73 @@ public class ScrollingMenu extends Menu {
      * This will set the absolute value of the value passed.
      * @param lineScrolledOnScroll The line scrolled on scroll
      */
-    public void setLineScrolledOnScroll(int lineScrolledOnScroll) { this.lineScrolledOnScroll = Math.abs(lineScrolledOnScroll); }
+    public final void setLineScrolledOnScroll(int lineScrolledOnScroll) { this.lineScrolledOnScroll = Math.abs(lineScrolledOnScroll); }
 
     /**
      * Gets the line scrolled on scroll.
      * @return The line scrolled on scroll
      */
-    public int getLineScrolledOnScroll() { return lineScrolledOnScroll; }
+    public final int getLineScrolledOnScroll() { return lineScrolledOnScroll; }
 
     /**
      * Sets the inventory corner of the scroll up item.
      * @param scrollUpInventoryCorner The inventory corner of the scroll up item
      */
-    public void setScrollUpInventoryCorner(InventoryCorner scrollUpInventoryCorner) { this.scrollUpInventoryCorner = scrollUpInventoryCorner; }
+    public final void setScrollUpInventoryCorner(InventoryCorner scrollUpInventoryCorner) { this.scrollUpInventoryCorner = scrollUpInventoryCorner; }
 
     /**
      * Sets the inventory corner of the scroll down item.
      * @param scrollDownInventoryCorner The inventory corner of the scroll down item
      */
-    public void setScrollDownInventoryCorner(InventoryCorner scrollDownInventoryCorner) { this.scrollDownInventoryCorner = scrollDownInventoryCorner; }
+    public final void setScrollDownInventoryCorner(InventoryCorner scrollDownInventoryCorner) { this.scrollDownInventoryCorner = scrollDownInventoryCorner; }
 
     /**
      * Sets the sound to play on scroll
      * @param scrollSound The sound to play on scroll
      */
-    public void setScrollSound(Sound scrollSound) { this.scrollSound = scrollSound; }
+    public final void setScrollSound(Sound scrollSound) { this.scrollSound = scrollSound; }
 
     /**
      * Sets the sound to play when you cannot scroll
      * @param cannotScrollSound The sound to play when you cannot scroll
      */
-    public void setCannotScrollSound(Sound cannotScrollSound) { this.cannotScrollSound = cannotScrollSound; }
+    public final void setCannotScrollSound(Sound cannotScrollSound) { this.cannotScrollSound = cannotScrollSound; }
 
     /**
      * Sets if the inventory should go back to the beginning when a player closes it.
      * @param resetOnClose If the inventory should go back to the beginning when a player closes it
      */
-    public void setResetOnClose(boolean resetOnClose) { this.resetOnClose = resetOnClose; }
+    public final void setResetOnClose(boolean resetOnClose) { this.resetOnClose = resetOnClose; }
 
     /**
      * Gets if this inventory goes back to line 0 on close.
      * @return If this inventory goes back to line 0 on close.
      */
-    public boolean isResetOnClose() { return resetOnClose; }
+    public final boolean isResetOnClose() { return resetOnClose; }
 
     /**
      * Sets the parent of this inventory
      * @param parent The parent of this inventory
      */
-    public void setParent(@Nullable Menu parent) { this.parent = parent; }
+    public final void setParent(@Nullable Menu parent) { this.parent = parent; }
 
     /**
      * Gets the parent of this menu
      * @return The parent of this menu
      */
-    @Nullable public Menu getParent() { return this.parent; }
-
-    /**
-     * Sets the code to be executed when the player clicks on his inventory when he is viewing this menu.
-     * @param lowerInventoryListener The listener to be invoked when the player clicks on his inventory when he is viewing this menu.
-     */
-    public void setLowerInventoryListener(Consumer<InventoryClickEvent> lowerInventoryListener) { this.lowerInventoryListener = lowerInventoryListener; }
+    @Nullable public final Menu getParent() { return this.parent; }
 
     /**
      * Sets the material to use for the scroll up or down buttons
       * @param scrollMaterial The material to be used for the scroll up or down buttons
      */
-    public void setScrollMaterial(Material scrollMaterial) { this.scrollMaterial = scrollMaterial; }
+    public final void setScrollMaterial(Material scrollMaterial) { this.scrollMaterial = scrollMaterial; }
 
     /**
      * Gets the material to be used for the scroll up or down buttons
      * @return The material to be used for the scroll up or down buttons
      */
-    public Material getScrollMaterial() { return scrollMaterial; }
+    public final Material getScrollMaterial() { return scrollMaterial; }
 
     private int getHighestIndex() {
         return items.keySet().stream()
