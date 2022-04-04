@@ -10,15 +10,37 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * This is an abstract implementation of the Menu class.
+ * This class has one field, a final MenuItem array. It is an
+ * array because the size of this menu will not change.
+ * Extend this class to create your own custom static menus.
+ */
 public abstract class StaticSizeMenu extends Menu {
 
     @NotNull private final MenuItem[] items;
 
+    /**
+     * Creates a new StaticSizeMenu object with the given parameters.
+     * @param plugin The plugin to register the listeners to.
+     * @param name The name of the inventory.
+     * @param size The size of the inventory.
+     * @param owner The owner of the inventory, null of there is no owner.
+     * @param items The items in this inventory.
+     */
     public StaticSizeMenu(@NotNull JavaPlugin plugin, @NotNull String name, int size, @Nullable InventoryHolder owner, @NotNull MenuItem[] items) {
         super(plugin, name, size, owner);
         this.items = items;
     }
 
+    /**
+     * Creates a new StaticSizeMenu object with the given parameters.
+     * @param plugin The plugin to register the listeners to.
+     * @param name The name of the inventory.
+     * @param size The size of the inventory.
+     * @param owner The owner of the inventory, null of there is no owner.
+     * @param items The items in this inventory, null for an empty inventory.
+     */
     public StaticSizeMenu(@NotNull JavaPlugin plugin, @NotNull String name, int size, @Nullable InventoryHolder owner, @Nullable Map<Integer, ? extends MenuItem> items) {
         super(plugin, name, size, owner);
         this.items = new MenuItem[size()];

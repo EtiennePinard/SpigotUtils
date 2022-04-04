@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
  * This class will register the listeners the inventory click, drag and close
  * listener. This is class is only use to quickly register Menu listeners and nothing else.
  * You can extend this class to make other menu or abstract class like I did
- * in this library (StaticMenu, DynamicMenu, ScrollingMenu)
+ * in this library (Menu, StaticSizeMenu, BasicMenu, ScrollingMenu)
  */
 public abstract class MenuListener {
 

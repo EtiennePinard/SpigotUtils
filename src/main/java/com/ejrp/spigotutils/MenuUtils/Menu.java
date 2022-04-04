@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * This is a specialization of the Menu class. It is a static menu,
- * meaning that every player that uses this inventory sees the same thing.
+ * This is an abstract menu with only an inventory has a field.
+ * Extend this class to create your custom inventories.
  */
 public abstract class Menu extends MenuListener {
 
