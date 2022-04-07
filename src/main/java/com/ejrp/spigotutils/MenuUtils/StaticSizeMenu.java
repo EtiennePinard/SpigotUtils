@@ -1,6 +1,8 @@
 package com.ejrp.spigotutils.MenuUtils;
 
 import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,9 +18,10 @@ import java.util.Objects;
  * array because the size of this menu will not change.
  * Extend this class to create your own custom static menus.
  */
-public abstract class StaticSizeMenu extends Menu {
+public abstract class StaticSizeMenu extends MenuListener {
 
     @NotNull private final MenuItem[] items;
+    @NotNull private final Inventory inventory;
 
     /**
      * Creates a new StaticSizeMenu object with the given parameters.
@@ -29,7 +32,8 @@ public abstract class StaticSizeMenu extends Menu {
      * @param items The items in this inventory.
      */
     public StaticSizeMenu(@NotNull JavaPlugin plugin, @NotNull String name, int size, @Nullable InventoryHolder owner, @NotNull MenuItem[] items) {
-        super(plugin, name, size, owner);
+        super(plugin);
+        this.inventory = Bukkit.createInventory(owner,size,name);
         this.items = items;
     }
 
@@ -42,13 +46,14 @@ public abstract class StaticSizeMenu extends Menu {
      * @param items The items in this inventory, null for an empty inventory.
      */
     public StaticSizeMenu(@NotNull JavaPlugin plugin, @NotNull String name, int size, @Nullable InventoryHolder owner, @Nullable Map<Integer, ? extends MenuItem> items) {
-        super(plugin, name, size, owner);
+        super(plugin);
+        this.inventory = Bukkit.createInventory(owner,size,name);
         this.items = new MenuItem[size()];
         if (items != null) items.forEach(this::addItem);
     }
 
     @Override
-    public final void addItem(int index, @NotNull MenuItem item) {
+    public void addItem(int index, @NotNull MenuItem item) {
         Validate.isTrue(index < 0 || index > size(),"The index needs to be between the size of the inventory and 0!");
         Objects.requireNonNull(item,"The menu item is null! If you want to delete an item, use the delete() method!");
         this.items[index] = item;
@@ -56,11 +61,20 @@ public abstract class StaticSizeMenu extends Menu {
     }
 
     @Override
-    public final void removeItem(int index) {
+    public void removeItem(int index) {
         Validate.isTrue(index < 0 || index > size(),"The index needs to be between the size of the inventory and 0!");
         this.items[index] = null;
         updateInventory();
     }
+
+    @Override
+    @NotNull public final String name() { return inventory.getName(); }
+
+    @Override
+    public final int size() { return inventory.getSize(); }
+
+    @Override
+    @NotNull public final Inventory getInventory() { return inventory; }
 
     /**
      * Updates the contents of the inventory.
@@ -68,7 +82,7 @@ public abstract class StaticSizeMenu extends Menu {
      * and the MenuItem array are out of sync.
      */
     @Override
-    public final void updateInventory() {
+    public void updateInventory() {
         ItemStack[] contents = new ItemStack[size()];
         for (int i = 0; i < items.length; i++)
             contents[i] = items[i].getItem();

@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public abstract class BasicMenu extends StaticSizeMenu {
 
-    @Nullable private Menu parent;
+    @Nullable private GenericMenu parent;
 
     /**
      * Creates a new BasicMenu with the specified parameters
@@ -35,7 +35,7 @@ public abstract class BasicMenu extends StaticSizeMenu {
                      String name,
                      int size,
                      @Nullable Map<Integer, MenuItem> items,
-                     @Nullable Menu parent) throws IllegalArgumentException {
+                     @Nullable GenericMenu parent) throws IllegalArgumentException {
         super(plugin, name, size,null,items);
         this.parent = parent;
     }
@@ -52,13 +52,13 @@ public abstract class BasicMenu extends StaticSizeMenu {
      * Sets the parent of this menu.
      * @param parent The new parent of this menu
      */
-    public final void setParent(@Nullable Menu parent) { this.parent = parent; }
+    public final void setParent(@Nullable GenericMenu parent) { this.parent = parent; }
 
     /**
      * Gets the parent of this menu
      * @return The parent of this menu
      */
-    @Nullable public final Menu getParent() { return this.parent; }
+    @Nullable public final GenericMenu getParent() { return this.parent; }
 
     /**
      * This is the code that will be executed when the player inventory

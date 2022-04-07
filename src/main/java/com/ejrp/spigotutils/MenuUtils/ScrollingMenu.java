@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,19 +26,20 @@ import java.util.Map;
  * You can set the line that you start at using the goToLine() method.
  * Scrolling up means going to higher index and scrolling down means going to lower index.
  */
-public abstract class ScrollingMenu extends Menu {
+public abstract class ScrollingMenu extends MenuListener {
 
+    private final Inventory inventory;
     private final Map<Integer, MenuItem> items;
-    private Menu parent;
+    private GenericMenu parent;
 
     private int lineScrolledOnScroll;
-    private Material scrollMaterial;
+    private @NotNull  Material scrollMaterial;
     private ItemStack scrollUpItem;
     private ItemStack scrollDownItem;
-    private InventoryCorner scrollUpInventoryCorner;
-    private InventoryCorner scrollDownInventoryCorner;
-    private Sound scrollSound;
-    private Sound cannotScrollSound;
+    @NotNull private InventoryCorner scrollUpInventoryCorner;
+    @NotNull private InventoryCorner scrollDownInventoryCorner;
+    @Nullable private Sound scrollSound;
+    @Nullable private Sound cannotScrollSound;
     private boolean resetOnClose;
 
     private int lineWeAreOn;
@@ -62,13 +64,14 @@ public abstract class ScrollingMenu extends Menu {
     public ScrollingMenu(@NotNull JavaPlugin plugin,
                          @NotNull String name, int size,
                          @Nullable Map<Integer, MenuItem> items,
-                         @Nullable Menu parent,
+                         @Nullable GenericMenu parent,
                          int lineScrolledOnScroll,
                          @NotNull Material scrollMaterial,
                          @NotNull InventoryCorner scrollUpInventoryCorner,
                          @NotNull InventoryCorner scrollDownInventoryCorner,
                          @Nullable Sound scrollSound, @Nullable Sound cannotScrollSound, boolean resetOnClose) {
-        super(plugin, name, size,null);
+        super(plugin);
+        this.inventory = Bukkit.createInventory(null,size,name);
         this.parent = parent;
 
         if (lineScrolledOnScroll < 0)
@@ -114,19 +117,19 @@ public abstract class ScrollingMenu extends Menu {
     }
 
     @Override
-    public final void addItem(int index, @NotNull MenuItem item) {
+    public void addItem(int index, @NotNull MenuItem item) {
         this.items.put(index, item);
         updateInventory();
     }
 
     @Override
-    public final void removeItem(int index) {
+    public void removeItem(int index) {
         this.items.remove(index);
         updateInventory();
     }
 
     @Override
-    public final void updateInventory() {
+    public void updateInventory() {
         updateButtons();
         ItemStack[] contents = new ItemStack[size()];
         getItems().forEach(((index, menuItem) -> {
@@ -140,6 +143,17 @@ public abstract class ScrollingMenu extends Menu {
         contents[scrollUpInventoryCorner.getIndex(size())] = scrollUpItem;
         this.getInventory().setContents(contents);
     }
+
+    @NotNull
+    @Override
+    public String name() { return inventory.getName(); }
+
+    @Override
+    public int size() { return inventory.getSize(); }
+
+    @NotNull
+    @Override
+    public Inventory getInventory() { return inventory; }
 
     /**
      * This is the code that will be executed when the player inventory
@@ -156,7 +170,7 @@ public abstract class ScrollingMenu extends Menu {
      * @param event The inventory click event that has just happened.
      */
     @Override
-    public final void onClick(@NotNull InventoryClickEvent event) {
+    public void onClick(@NotNull InventoryClickEvent event) {
         if (event.getClickedInventory() == null) return;
         if (!(event.getWhoClicked() instanceof Player)) return;
 
@@ -178,7 +192,7 @@ public abstract class ScrollingMenu extends Menu {
      * @param event The inventory drag event that has just happened.
      */
     @Override
-    public final void onDrag(@NotNull InventoryDragEvent event) {
+    public void onDrag(@NotNull InventoryDragEvent event) {
         if (event.getInventory().equals(getInventory()))
             event.setCancelled(true);
     }
@@ -188,7 +202,7 @@ public abstract class ScrollingMenu extends Menu {
      * @param event The inventory close event that has just happened.
      */
     @Override
-    public final void onExit(@NotNull InventoryCloseEvent event) {
+    public void onExit(@NotNull InventoryCloseEvent event) {
         if (event.getInventory().equals(getInventory())) {
             if (resetOnClose) {
                 this.lineWeAreOn = 0;
@@ -294,25 +308,25 @@ public abstract class ScrollingMenu extends Menu {
      * Sets the inventory corner of the scroll up item.
      * @param scrollUpInventoryCorner The inventory corner of the scroll up item
      */
-    public final void setScrollUpInventoryCorner(InventoryCorner scrollUpInventoryCorner) { this.scrollUpInventoryCorner = scrollUpInventoryCorner; }
+    public final void setScrollUpInventoryCorner(@NotNull InventoryCorner scrollUpInventoryCorner) { this.scrollUpInventoryCorner = scrollUpInventoryCorner; }
 
     /**
      * Sets the inventory corner of the scroll down item.
      * @param scrollDownInventoryCorner The inventory corner of the scroll down item
      */
-    public final void setScrollDownInventoryCorner(InventoryCorner scrollDownInventoryCorner) { this.scrollDownInventoryCorner = scrollDownInventoryCorner; }
+    public final void setScrollDownInventoryCorner(@NotNull InventoryCorner scrollDownInventoryCorner) { this.scrollDownInventoryCorner = scrollDownInventoryCorner; }
 
     /**
      * Sets the sound to play on scroll
      * @param scrollSound The sound to play on scroll
      */
-    public final void setScrollSound(Sound scrollSound) { this.scrollSound = scrollSound; }
+    public final void setScrollSound(@Nullable Sound scrollSound) { this.scrollSound = scrollSound; }
 
     /**
      * Sets the sound to play when you cannot scroll
      * @param cannotScrollSound The sound to play when you cannot scroll
      */
-    public final void setCannotScrollSound(Sound cannotScrollSound) { this.cannotScrollSound = cannotScrollSound; }
+    public final void setCannotScrollSound(@Nullable Sound cannotScrollSound) { this.cannotScrollSound = cannotScrollSound; }
 
     /**
      * Sets if the inventory should go back to the beginning when a player closes it.
@@ -330,24 +344,25 @@ public abstract class ScrollingMenu extends Menu {
      * Sets the parent of this inventory
      * @param parent The parent of this inventory
      */
-    public final void setParent(@Nullable Menu parent) { this.parent = parent; }
+    public final void setParent(@Nullable GenericMenu parent) { this.parent = parent; }
 
     /**
      * Gets the parent of this menu
      * @return The parent of this menu
      */
-    @Nullable public final Menu getParent() { return this.parent; }
+    @Nullable public final GenericMenu getParent() { return this.parent; }
 
     /**
      * Sets the material to use for the scroll up or down buttons
       * @param scrollMaterial The material to be used for the scroll up or down buttons
      */
-    public final void setScrollMaterial(Material scrollMaterial) { this.scrollMaterial = scrollMaterial; }
+    public final void setScrollMaterial(@NotNull Material scrollMaterial) { this.scrollMaterial = scrollMaterial; }
 
     /**
      * Gets the material to be used for the scroll up or down buttons
      * @return The material to be used for the scroll up or down buttons
      */
+    @NotNull
     public final Material getScrollMaterial() { return scrollMaterial; }
 
     private int getHighestIndex() {

@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
  * You can extend this class to make other menu or abstract class like I did
  * in this library (Menu, StaticSizeMenu, BasicMenu, ScrollingMenu)
  */
-public abstract class MenuListener {
+public abstract class MenuListener implements GenericMenu {
 
     private final JavaPlugin plugin;
     private boolean bypassClickEvent = false;
@@ -30,65 +30,19 @@ public abstract class MenuListener {
         plugin.getServer().getPluginManager().registerEvents(new MenuListenerRegister(this), plugin);
     }
 
-    /**
-     * Gets called when a click happens in an inventory
-     * @param event The inventory click event that has just happened.
-     */
-    public abstract void onClick(@NotNull InventoryClickEvent event);
-
-    /**
-     * Gets called when an item is dragged in an inventory.
-     * @param event The inventory drag event that has just happened.
-     */
-    public abstract void onDrag(@NotNull InventoryDragEvent event);
-
-    /**
-     * Gets called when an inventory is closed.
-     * @param event The inventory close event that has just happened.
-     */
-    public abstract void onExit(@NotNull InventoryCloseEvent event);
-
-    /**
-     * Gets the plugin that the listeners are registered to.
-     * @return The plugin that the listeners are registered to.
-     */
     @NotNull public final JavaPlugin getPlugin() { return this.plugin; }
 
-    /**
-     * Sets if the inventory click event should be bypassed
-     * @param bypassClickEvent If the inventory click event should be bypassed
-     */
     public final void setBypassClickEvent(boolean bypassClickEvent) { this.bypassClickEvent = bypassClickEvent; }
 
-    /**
-     * Sets if the inventory drag event should be bypassed
-     * @param bypassDragEvent If the inventory drag event should be bypassed
-     */
     public final void setBypassDragEvent(boolean bypassDragEvent) { this.bypassDragEvent = bypassDragEvent; }
 
-    /**
-     * Sets if the inventory close event should be bypassed
-     * @param bypassCloseEvent If the inventory close event should be bypassed
-     */
     public final void setBypassCloseEvent(boolean bypassCloseEvent) { this.bypassCloseEvent = bypassCloseEvent; }
 
-    /**
-     * Gets if the inventory click event is bypassed
-     * @return If the inventory`click event is bypassed
-     */
-    public final boolean isBypassClickEvent() { return bypassClickEvent; }
+    public final boolean isClickEventBypass() { return bypassClickEvent; }
 
-    /**
-     * Gets if the inventory drag event is bypassed
-     * @return If the inventory`drag event is bypassed
-     */
-    public final boolean isBypassDragEvent() { return bypassDragEvent; }
+    public final boolean isDragEventBypass() { return bypassDragEvent; }
 
-    /**
-     * Gets if the inventory close event is bypassed
-     * @return If the inventory`close event is bypassed
-     */
-    public final boolean isBypassCloseEvent() { return bypassCloseEvent; }
+    public final boolean isCloseEventBypass() { return bypassCloseEvent; }
 
     /**
      * This is the class that is used to register the inventory listener
@@ -101,12 +55,12 @@ public abstract class MenuListener {
         private MenuListenerRegister(MenuListener staticMenuListener) { this.staticMenuListener = staticMenuListener; }
 
         @EventHandler
-        public void onClick(@NotNull InventoryClickEvent event) { if (!staticMenuListener.isBypassClickEvent()) staticMenuListener.onClick(event); }
+        public void onClick(@NotNull InventoryClickEvent event) { if (!staticMenuListener.isClickEventBypass()) staticMenuListener.onClick(event); }
 
         @EventHandler
-        public void onDrag(@NotNull InventoryDragEvent event) { if (!staticMenuListener.isBypassDragEvent()) staticMenuListener.onDrag(event); }
+        public void onDrag(@NotNull InventoryDragEvent event) { if (!staticMenuListener.isDragEventBypass()) staticMenuListener.onDrag(event); }
 
         @EventHandler
-        public void onExit(@NotNull final InventoryCloseEvent event) { if (!staticMenuListener.isBypassCloseEvent()) staticMenuListener.onExit(event); }
+        public void onExit(@NotNull final InventoryCloseEvent event) { if (!staticMenuListener.isCloseEventBypass()) staticMenuListener.onExit(event); }
     }
 }
