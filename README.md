@@ -45,7 +45,7 @@ ItemStack item = new ItemBuilder(Material.DIAMOND)
         .setDisplayName(ChatColor.GOLD + "What is 42?")
         .setLore(ChatColor.GREEN + "The answer to the universe and everything!")
         .getItem();
-```java
+```
 
 Here is how you can create a speed potion with a custom effect, color and hidden attributes. 
 Please take note that this only works in 1.9 or above. If you are using 1.8, then use the Potion class in the spigot API
