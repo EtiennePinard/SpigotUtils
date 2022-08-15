@@ -24,15 +24,15 @@ here is how you can add the Spigot Utils dependency to your poject.
 This is how to create a command using the PluginCommand class:
 
 ```java
-import com.ejrp.spigotutils.CommandUtils.*;
+import com.ejrp.spigotutils.commandUtils.*;
 
 @CommandInfo(name = "example", permission = "admin", requiresPlayer = true)
 public class CommandExample {
 
-  @Override
-  public void execute(Player player, String[] args) { 
-       // If requiresPlayer is equal false, then override the execute method with the commandSender parameter
-  }
+    @Override
+    public void execute(Player player, String[] args) {
+        // If requiresPlayer is equal false, then override the execute method with the commandSender parameter
+    }
 
 }
 ```
@@ -45,7 +45,7 @@ ItemStack item = new ItemBuilder(Material.DIAMOND)
         .setDisplayName(ChatColor.GOLD + "What is 42?")
         .setLore(ChatColor.GREEN + "The answer to the universe and everything!")
         .getItem();
-```
+```java
 
 Here is how you can create a speed potion with a custom effect, color and hidden attributes. 
 Please take note that this only works in 1.9 or above. If you are using 1.8, then use the Potion class in the spigot API
