@@ -24,15 +24,15 @@ here is how you can add the Spigot Utils dependency to your poject.
 This is how to create a command using the PluginCommand class:
 
 ```java
-import com.ejrp.spigotutils.CommandUtils.*;
+import com.ejrp.spigotutils.commandUtils.*;
 
 @CommandInfo(name = "example", permission = "admin", requiresPlayer = true)
 public class CommandExample {
 
-  @Override
-  public void execute(Player player, String[] args) { 
-       // If requiresPlayer is equal false, then override the execute method with the commandSender parameter
-  }
+    @Override
+    public void execute(Player player, String[] args) {
+        // If requiresPlayer is equal false, then override the execute method with the commandSender parameter
+    }
 
 }
 ```

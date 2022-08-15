@@ -1,9 +1,4 @@
-package com.ejrp.spigotutils.CommandUtils;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.ejrp.spigotutils.commandUtils
 
 /**
  * This is an annotation to use the in conjunction with the PluginCommand class.
@@ -13,10 +8,6 @@ import java.lang.annotation.Target;
  * Also, huge thanks to Jordan Osterberg that made this code.
  * Here is a link to his channel: https://www.youtube.com/channel/UCiZQVaud0pAPfzA8busnRBA
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface CommandInfo {
-    String name();
-    String permission() default "operator";
-    boolean requiresPlayer();
-}
+@Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class CommandInfo(val name: String, val permission: String = "operator", val requiresPlayer: Boolean)

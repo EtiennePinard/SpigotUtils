@@ -1,15 +1,11 @@
-package com.ejrp.spigotutils.ItemsUtils;
+package com.ejrp.spigotutils.itemsUtils
 
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
+import org.bukkit.Material
+import org.bukkit.enchantments.Enchantment
+import org.bukkit.inventory.ItemFlag
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
+import java.util.function.Consumer
 
 /**
  * Utility class to quickly create custom items in a spigot plugin.
@@ -17,67 +13,75 @@ import java.util.function.Consumer;
  * and so some method like setUnbreakable() are not yet supported. If you want
  * to use them you will have to use the modifyMeta() method.
  */
-public class ItemBuilder {
-
-    @NotNull private final ItemStack item;
-    @NotNull private final ItemMeta meta;
-
+class ItemBuilder(private val item: ItemStack) {
     /**
-     * Creates a new instance of the custom item class with the specified parameter.
-     * @param item The item of the custom item.
+     * Gets the meta of this item
+     * @return The meta of this item
      */
-    public ItemBuilder(@NotNull ItemStack item) {
-        this.item = item;
-        meta = item.getItemMeta();
-    }
+    private val itemMeta: ItemMeta = item.itemMeta
 
     /**
      * Creates a new instance of the custom item class with the specified type and an amount of one.
      * @param type The type of the item.
      */
-    public ItemBuilder(Material type) { this(new ItemStack(type)); }
+    constructor(type: Material) : this(ItemStack(type))
 
     /**
      * Sets the type of this custom item
      * @param type The new type of this custom item
      * @return The current object for method chaining
      */
-    @NotNull public ItemBuilder setMaterial(Material type) { item.setType(type); return this; }
+    fun setMaterial(type: Material): ItemBuilder {
+        item.type = type
+        return this
+    }
 
     /**
      * Sets the amount of the item
      * @param amount The new amount of the item
      * @return The current object for method chaining
      */
-    @NotNull public ItemBuilder setItemAmount(int amount) { item.setAmount(amount); return this; }
+    fun setItemAmount(amount: Int): ItemBuilder {
+        item.amount = amount
+        return this
+    }
 
     /**
      * Sets the display name of this custom item
      * @param displayName The new display name of this custom item
      * @return The current object for method chaining
      */
-    @NotNull public ItemBuilder setDisplayName(String displayName) { meta.setDisplayName(displayName); return this; }
+    fun setDisplayName(displayName: String): ItemBuilder {
+        itemMeta.displayName = displayName
+        return this
+    }
 
     /**
      * Sets the lore of this custom item
      * @param lore The new lore of this custom item
      * @return The current object for method chaining
      */
-    @NotNull public ItemBuilder setLore(List<String> lore) { meta.setLore(lore); return this; }
+    fun setLore(lore: List<String>): ItemBuilder {
+        itemMeta.lore = lore
+        return this
+    }
 
     /**
      * Sets the lore of this custom item
      * @param lines The new lore of this custom item
      * @return The current object for method chaining
      */
-    @NotNull public ItemBuilder setLore(String... lines) { return setLore(Arrays.asList(lines)); }
+    fun setLore(vararg lines: String): ItemBuilder = setLore(listOf(*lines))
 
     /**
      * Adds an item flag to this custom item
      * @param itemFlags The item flags to add to this custom item
      * @return The current object for method chaining
      */
-    @NotNull public ItemBuilder addItemFlags(ItemFlag... itemFlags) { meta.addItemFlags(itemFlags); return this; }
+    fun addItemFlags(vararg itemFlags: ItemFlag): ItemBuilder {
+        itemMeta.addItemFlags(*itemFlags)
+        return this
+    }
 
     /**
      * Adds an enchantment to this custom item
@@ -86,9 +90,9 @@ public class ItemBuilder {
      * @param ignoreLevelRestriction If the enchantment should ignore the default minecraft level restriction
      * @return The current object for method chaining
      */
-    @NotNull public ItemBuilder addEnchants(Enchantment enchantment, int level, boolean ignoreLevelRestriction) {
-        meta.addEnchant(enchantment,level,ignoreLevelRestriction);
-        return this;
+    fun addEnchants(enchantment: Enchantment, level: Int, ignoreLevelRestriction: Boolean): ItemBuilder {
+        itemMeta.addEnchant(enchantment, level, ignoreLevelRestriction)
+        return this
     }
 
     /**
@@ -96,9 +100,9 @@ public class ItemBuilder {
      * @param consumer The consumer that will modify this item
      * @return The current object for method chaining
      */
-    @NotNull public ItemBuilder modifyItem(@NotNull Consumer<ItemStack> consumer)  {
-        consumer.accept(item);
-        return this;
+    fun modifyItem(consumer: Consumer<ItemStack>): ItemBuilder {
+        consumer.accept(item)
+        return this
     }
 
     /**
@@ -106,21 +110,17 @@ public class ItemBuilder {
      * @param consumer The consumer that will modify the item meta
      * @return The current object for method chaining
      */
-    @NotNull public ItemBuilder modifyMeta(@NotNull Consumer<ItemMeta> consumer) {
-        consumer.accept(meta);
-        return this;
+    fun modifyMeta(consumer: Consumer<ItemMeta>): ItemBuilder {
+        consumer.accept(itemMeta)
+        return this
     }
-
-    /**
-     * Gets the meta of this item
-     * @return The meta of this item
-     */
-    @NotNull  public ItemMeta getItemMeta() { return meta; }
 
     /**
      * Gets the item and sets the item meta on the item.
      * @return The item with the current item meta.
      */
-    @NotNull public ItemStack getItem() { item.setItemMeta(meta); return item; }
-
+    fun getItem(): ItemStack {
+        item.itemMeta = itemMeta
+        return item
+    }
 }
