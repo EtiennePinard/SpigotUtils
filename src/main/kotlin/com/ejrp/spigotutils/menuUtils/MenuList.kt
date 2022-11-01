@@ -14,38 +14,21 @@ import org.bukkit.inventory.ItemStack
  * and of the next item is (menu.size() - 1). It will also bypass the inventory close event of each inventory.
  * The order of the menu are the order of the list.
  */
-class MenuList(next: Material, back: Material, standardMenus: MutableList<GenericMenu>) {
-    /**
-     * Gets the list of Menus that this MenuList has.
-     * @return The list of Menus that this MultiMenu has.
-     */
-    private val menus: MutableList<GenericMenu>
-    private val next: ItemStack
-    private val back: ItemStack
+class MenuList(next: Material, back: Material, private val menus: MutableList<StaticSizeMenu>) {
 
-    /**
-     * Creates a new instance of MenuChain
-     * @param next The material for the next "button"
-     * @param back The material for the back "button"
-     * @param standardMenus The menus of this chain
-     */
-    init {
-        this.next = ItemBuilder(next)
-            .setDisplayName(ChatColor.GRAY.toString() + "Next")
-            .getItem()
-        this.back = ItemBuilder(back)
-            .setDisplayName(ChatColor.GRAY.toString() + "Back")
-            .getItem()
-        menus = standardMenus
-        updateMenus()
-    }
+    private val next: ItemStack = ItemBuilder(next)
+        .setDisplayName(ChatColor.GRAY.toString() + "Next")
+        .getItem()
+    private val back: ItemStack =  ItemBuilder(back)
+        .setDisplayName(ChatColor.GRAY.toString() + "Back")
+        .getItem()
 
     /**
      * Adds a menu at the specified index
      * @param index The index of the menu to add
      * @param menu The menu to add
      */
-    fun addMenu(index: Int, menu: GenericMenu) {
+    fun addMenu(index: Int, menu: StaticSizeMenu) {
         menus.add(index, menu)
         updateMenus()
     }
@@ -54,7 +37,7 @@ class MenuList(next: Material, back: Material, standardMenus: MutableList<Generi
      * Adds a menu at the end of the list of menus
      * @param menu The menu to add
      */
-    fun addMenu(menu: GenericMenu) {
+    fun addMenu(menu: StaticSizeMenu) {
         addMenu(menus.size, menu)
     }
 
@@ -73,8 +56,8 @@ class MenuList(next: Material, back: Material, standardMenus: MutableList<Generi
     }
 
     private fun addNavigationArrow(
-        menuToAddItemTo: GenericMenu,
-        menuToNavigateTo: GenericMenu,
+        menuToAddItemTo: StaticSizeMenu,
+        menuToNavigateTo: StaticSizeMenu,
         slot: Int,
         navigateItem: ItemStack
     ) {
@@ -94,5 +77,5 @@ class MenuList(next: Material, back: Material, standardMenus: MutableList<Generi
      * @throws IndexOutOfBoundsException If the index is out of bounds
      */
     @Throws(IndexOutOfBoundsException::class)
-    fun getInventoryAt(index: Int): GenericMenu = menus[index]
+    fun getInventoryAt(index: Int): StaticSizeMenu = menus[index]
 }

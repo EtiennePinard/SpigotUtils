@@ -23,7 +23,7 @@ import kotlin.math.abs
  * You can set the line that you start at using the goToLine() method.
  * Scrolling up means going to higher index and scrolling down means going to lower index.
  */
-abstract class ScrollingMenu @JvmOverloads constructor(
+abstract class ScrollingMenu(
     /**
      * Creates a new instance of a scrolling menu, with the specified parameters.
      * @param plugin The plugin to register the listeners to.
@@ -42,17 +42,18 @@ abstract class ScrollingMenu @JvmOverloads constructor(
      * if the inventory are corner are the same, or they are the same side when the inventory size is 9.
      */
     plugin: JavaPlugin,
-    name: String, size: Int,
-    items: MutableMap<Int, MenuItem>? = null,
+    name: String,
+    size: Int,
+    private val items: MutableMap<Int, MenuItem> = HashMap(),
     parent: GenericMenu? = null,
     lineScrolledOnScroll: Int = 1,
     scrollMaterial: Material = Material.LADDER,
     scrollUpInventoryCorner: InventoryCorner = InventoryCorner.TOP_RIGHT,
     scrollDownInventoryCorner: InventoryCorner = InventoryCorner.BOTTOM_RIGHT,
-    scrollSound: Sound? = null, cannotScrollSound: Sound? = null, resetOnClose: Boolean = true
+    scrollSound: Sound? = null, cannotScrollSound: Sound? = null,
+    resetOnClose: Boolean = true
 ) : MenuListener(plugin) {
     final override val inventory: Inventory
-    private val items: MutableMap<Int, MenuItem>
     var parent: GenericMenu?
     var lineScrolledOnScroll: Int = 1
         set(value) { field = abs(value) }
@@ -64,23 +65,22 @@ abstract class ScrollingMenu @JvmOverloads constructor(
     var scrollSound: Sound?
     var cannotScrollSound: Sound?
     var isResetOnClose: Boolean
-    private var lineWeAreOn: Int
+    private var lineWeAreOn: Int = 0
 
     init {
         inventory = Bukkit.createInventory(null, size, name)
         this.parent = parent
         require(lineScrolledOnScroll >= 0) { "The line scrolled on scroll needs to be a number bigger than 0!" }
         this.lineScrolledOnScroll = lineScrolledOnScroll
-        this.items = items ?: HashMap()
-        require(scrollDownInventoryCorner.ordinal != scrollUpInventoryCorner.ordinal) { "The corner of the scroll down and scroll up item cannot be the same!" }
+        require(scrollDownInventoryCorner != scrollUpInventoryCorner) { "The corner of the scroll down and scroll up item cannot be the same!" }
         if (size == 9) {
             require(
-                !(scrollDownInventoryCorner.name.lowercase(Locale.getDefault()).contains("right")
-                        && scrollUpInventoryCorner.name.lowercase(Locale.getDefault()).contains("right"))
+                !(scrollDownInventoryCorner.name.lowercase().contains("right")
+                        && scrollUpInventoryCorner.name.lowercase().contains("right"))
             ) { "When the inventory size is 9 (only one layer), the scroll items must be in opposites sides." }
             require(
-                !(scrollDownInventoryCorner.name.lowercase(Locale.getDefault()).contains("left")
-                        && scrollUpInventoryCorner.name.lowercase(Locale.getDefault()).contains("left"))
+                !(scrollDownInventoryCorner.name.lowercase().contains("left")
+                        && scrollUpInventoryCorner.name.lowercase().contains("left"))
             ) { "When the inventory size is 9 (only one layer), the scroll items must be in opposites sides." }
         }
         this.scrollUpInventoryCorner = scrollUpInventoryCorner
@@ -89,11 +89,10 @@ abstract class ScrollingMenu @JvmOverloads constructor(
         this.cannotScrollSound = cannotScrollSound
         this.scrollMaterial = scrollMaterial
         isResetOnClose = resetOnClose
-        lineWeAreOn = 0
         updateButtons()
     }
 
-    override fun addItem(index: Int, item: MenuItem) {
+    fun addItem(index: Int, item: MenuItem) {
         items[index] = item
         updateInventory()
     }
@@ -167,7 +166,8 @@ abstract class ScrollingMenu @JvmOverloads constructor(
         }
         if (parent != null) Bukkit.getScheduler().runTaskLater(
             plugin,
-            { event.player.openInventory(parent!!.inventory) }, 1)
+            { event.player.openInventory(parent!!.inventory) },
+            1)
 
     }
 

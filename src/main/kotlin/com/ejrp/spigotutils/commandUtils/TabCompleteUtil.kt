@@ -17,17 +17,21 @@ class TabCompleteUtil
  * the actual arguments, which is the key. So this means that you can have
  * different arguments based on what precede them.
  */(private val argumentMap: Map<Array<String>, List<String>>) : TabCompleter {
-    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String>? {
+    override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<String>): List<String> {
         val result = ArrayList<String>()
         val previousArguments = arrayOfNulls<String>(args.size - 1)
-        System.arraycopy(args, 0, previousArguments, 0, args.size - 1)
+        System.arraycopy(args, 0, previousArguments, 0, previousArguments.size)
         val optionalStrings = argumentMap.keys.stream()
-            .filter { strings: Array<String>? -> Arrays.equals(strings, previousArguments) }
+            .filter { strings: Array<String> -> strings.contentEquals(previousArguments) }
             .findFirst()
-        if (!optionalStrings.isPresent) return null
-        for (arg in argumentMap[optionalStrings.get()]!!)
-            if (arg.lowercase().startsWith(args[args.size - 1].lowercase()))
+        if (!optionalStrings.isPresent) return result // Empty strings
+        for (arg in argumentMap[optionalStrings.get()]!!) {
+            // If the defined argument starts with the argument inputted by the player then the
+            // key is a valid argument to the command
+            if (arg.lowercase().startsWith(args[args.size - 1].lowercase())) {
                 result.add(arg)
+            }
+        }
         return result
     }
 }

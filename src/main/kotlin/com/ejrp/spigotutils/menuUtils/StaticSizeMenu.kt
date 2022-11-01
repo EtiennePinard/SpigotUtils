@@ -5,7 +5,6 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
-import java.util.*
 
 /**
  * This is an abstract implementation of the Menu class.
@@ -51,12 +50,11 @@ abstract class StaticSizeMenu : MenuListener {
     ) : super(plugin) {
         inventory = Bukkit.createInventory(owner, size, name)
         this.items = arrayOfNulls(size)
-        items.forEach { (index: Int, item: MenuItem?) -> addItem(index, item) }
+        items.forEach { (index: Int, item: MenuItem) -> addItem(index, item) }
     }
 
-    override fun addItem(index: Int, item: MenuItem) {
+    fun addItem(index: Int, item: MenuItem) {
         require(index < 0 || index > size) { "The index needs to be between the size of the inventory and 0!" }
-        Objects.requireNonNull(item, "The menu item is null! If you want to delete an item, use the removeItem() function!")
         items[index] = item
         updateInventory()
     }
@@ -74,7 +72,7 @@ abstract class StaticSizeMenu : MenuListener {
      */
     override fun updateInventory() {
         val contents = arrayOfNulls<ItemStack>(size)
-        for (i in items.indices) contents[i] = items[i]!!.item
+        for (i in items.indices) contents[i] = items[i]?.item
         inventory.contents = contents
     }
 }
