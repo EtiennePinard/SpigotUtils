@@ -44,7 +44,6 @@ class MenuList(next: Material, back: Material, private val menus: MutableList<St
     private fun updateMenus() {
         for (index in menus.indices) {
             val standardMenu = menus[index]
-            standardMenu.isCloseEventBypass = true
             val lastSlot: Int = standardMenu.size - 1
             val next = if (menus.size == index + 1) standardMenu else menus[index + 1]
             val back = if (index == 0) standardMenu else menus[index - 1]
