@@ -2,7 +2,7 @@ package com.ejrp.spigotutils.menuUtils
 
 import org.bukkit.inventory.Inventory
 
-interface GenericMenu : GenericMenuListener {
+interface GenericMenu {
     /**
      * Gets the inventory
      * @return The inventory
@@ -19,17 +19,6 @@ interface GenericMenu : GenericMenuListener {
      */
     val size: Int
     get() = inventory.size
-
-    /**
-     * Adds an item to the inventory at the specified index.
-     * I made it use a menu item instead of a regular item stack
-     * because the menu item provides code when the item is clicked.
-     * @param index The index of the item
-     * @param item The item to add
-     * @throws IllegalArgumentException If the index is out of bounds
-     * @throws UnsupportedOperationException If the menu does not support this operation.
-     */
-    fun addItem(index: Int, item: MenuItem)
 
     /**
      * Removes an item at the specified index

@@ -49,8 +49,9 @@ abstract class BasicMenu
         if (event.whoClicked !is Player) return
         if (event.inventory == inventory) {
             event.isCancelled = true
-            if (event.clickedInventory is PlayerInventory) onPlayerInventoryClick(event) else if (items[event.slot] != null) items[event.slot]!!
-                .clicked(event)
+            if (event.clickedInventory is PlayerInventory)
+                onPlayerInventoryClick(event)
+            else items[event.slot]?.clicked(event)
         }
     }
 
@@ -68,9 +69,9 @@ abstract class BasicMenu
      */
     override fun onExit(event: InventoryCloseEvent) {
         if (event.inventory == inventory) {
-            if (parent != null) Bukkit.getScheduler().runTaskLater(
-                plugin,
-                { event.player.openInventory(parent!!.inventory) }, 1)
+            parent?.let {
+                Bukkit.getScheduler().runTaskLater(plugin, { event.player.openInventory(it.inventory) }, 1)
+            }
         }
     }
 }

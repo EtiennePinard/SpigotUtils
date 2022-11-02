@@ -42,7 +42,7 @@ abstract class PluginCommand : CommandExecutor {
      * @param player The player that sent this command
      * @param args The arguments passed by the player
      */
-    open fun execute(player: Player?, args: Array<String>?) {}
+    open fun execute(player: Player, args: Array<String>) {}
 
     /**
      * The method that will get executed after all the checks are made in the PluginCommand class.
@@ -50,5 +50,5 @@ abstract class PluginCommand : CommandExecutor {
      * @param sender The sender of the command
      * @param args The arguments passed by the sender
      */
-    open fun execute(sender: CommandSender?, args: Array<String>?) {}
+    open fun execute(sender: CommandSender, args: Array<String>) {}
 }

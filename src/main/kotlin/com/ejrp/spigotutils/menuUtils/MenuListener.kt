@@ -5,6 +5,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
@@ -12,16 +13,11 @@ import org.bukkit.plugin.java.JavaPlugin
  * listener. This is class is only use to quickly register Menu listeners and nothing else.
  * You can extend this class to make other menu or abstract class like I did
  * in this library (Menu, StaticSizeMenu, BasicMenu, ScrollingMenu)
+ * @param plugin The plugin to register the listeners too.
  */
-abstract class MenuListener(final override val plugin: JavaPlugin) : GenericMenu {
-    override var isClickEventBypass = false
-    override var isDragEventBypass = false
-    override var isCloseEventBypass = false
 
-    /**
-     * Creates a new instance of a menu.
-     * @param plugin The plugin to register the listeners too.
-     */
+abstract class MenuListener(final override val plugin: JavaPlugin) : GenericMenuListener {
+
     init {
         plugin.server.pluginManager.registerEvents(MenuListenerRegister(this), plugin)
     }
@@ -33,17 +29,22 @@ abstract class MenuListener(final override val plugin: JavaPlugin) : GenericMenu
     internal class MenuListenerRegister(private val staticMenuListener: MenuListener) : Listener {
         @EventHandler
         fun onClick(event: InventoryClickEvent) {
-            if (!staticMenuListener.isClickEventBypass) staticMenuListener.onClick(event)
+           staticMenuListener.onClick(event)
         }
 
         @EventHandler
         fun onDrag(event: InventoryDragEvent) {
-            if (!staticMenuListener.isDragEventBypass) staticMenuListener.onDrag(event)
+            staticMenuListener.onDrag(event)
         }
 
         @EventHandler
         fun onExit(event: InventoryCloseEvent) {
-            if (!staticMenuListener.isCloseEventBypass) staticMenuListener.onExit(event)
+            staticMenuListener.onExit(event)
+        }
+
+        @EventHandler
+        fun onOpen(event: InventoryOpenEvent) {
+            staticMenuListener.onOpen(event)
         }
     }
 }

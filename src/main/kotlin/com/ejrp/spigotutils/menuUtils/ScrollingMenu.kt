@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
-import kotlin.math.abs
 
 /**
  * This class is an abstract implementation of an inventory that scrolls up and down.
@@ -22,78 +21,62 @@ import kotlin.math.abs
  * It starts at the top, and you can only go down at the beginning.
  * You can set the line that you start at using the goToLine() method.
  * Scrolling up means going to higher index and scrolling down means going to lower index.
+ * @param plugin The plugin to register the listeners to.
+ * @param name The name of this menu
+ * @param size The size of this menu. Keep in mind that the inventory will keep the same size has you scroll.
+ * @param items The items that are contained in this inventory. The index only have to be bigger than 0, if not, they will be ignored.
+ * @param parent The inventory to open if when this one closes.
+ * @param lineScrolledOnScroll The amount of line that are scrolled on click. So you can skip one line if you set this value to 2.
+ * @param scrollMaterial The material use by the item that when clicked will scroll the inventory up or down.
+ * @param scrollUpInventoryCorner The corner of the item that will scroll the menu up when clicked.
+ * @param scrollDownInventoryCorner The corner of the item that will scroll the menu down when clicked.
+ * @param scrollSound The sound to play when the player scroll.
+ * @param cannotScrollSound The sound to play when the player cannot scroll
+ * @param isResetOnClose If the inventory should return to his original position when you close it.
+ * @throws IllegalArgumentException If the size is invalid, if the line scrolled on scroll is invalid,
+ * if the inventory are corner are the same, or they are the same side when the inventory size is 9.
  */
-abstract class ScrollingMenu @JvmOverloads constructor(
-    /**
-     * Creates a new instance of a scrolling menu, with the specified parameters.
-     * @param plugin The plugin to register the listeners to.
-     * @param name The name of this menu
-     * @param size The size of this menu. Keep in mind that the inventory will keep the same size has you scroll.
-     * @param items The items that are contained in this inventory. The index only have to be bigger than 0, if not, they will be ignored.
-     * @param parent The inventory to open if when this one closes.
-     * @param lineScrolledOnScroll The amount of line that are scrolled on click. So you can skip one line if you set this value to 2.
-     * @param scrollMaterial The material use by the item that when clicked will scroll the inventory up or down.
-     * @param scrollUpInventoryCorner The corner of the item that will scroll the menu up when clicked.
-     * @param scrollDownInventoryCorner The corner of the item that will scroll the menu down when clicked.
-     * @param scrollSound The sound to play when the player scroll.
-     * @param cannotScrollSound The sound to play when the player cannot scroll
-     * @param resetOnClose If the inventory should return to his original position when you close it.
-     * @throws IllegalArgumentException If the size is invalid, if the line scrolled on scroll is invalid,
-     * if the inventory are corner are the same, or they are the same side when the inventory size is 9.
-     */
+abstract class ScrollingMenu(
     plugin: JavaPlugin,
-    name: String, size: Int,
-    items: MutableMap<Int, MenuItem>? = null,
-    parent: GenericMenu? = null,
+    name: String,
+    size: Int,
+    private val items: MutableMap<Int, MenuItem> = HashMap(),
+    private var parent: GenericMenu? = null,
     lineScrolledOnScroll: Int = 1,
-    scrollMaterial: Material = Material.LADDER,
-    scrollUpInventoryCorner: InventoryCorner = InventoryCorner.TOP_RIGHT,
-    scrollDownInventoryCorner: InventoryCorner = InventoryCorner.BOTTOM_RIGHT,
-    scrollSound: Sound? = null, cannotScrollSound: Sound? = null, resetOnClose: Boolean = true
-) : MenuListener(plugin) {
-    final override val inventory: Inventory
-    private val items: MutableMap<Int, MenuItem>
-    var parent: GenericMenu?
-    var lineScrolledOnScroll: Int = 1
-        set(value) { field = abs(value) }
-    var scrollMaterial: Material
+    var scrollMaterial: Material = Material.LADDER,
+    var scrollUpInventoryCorner: InventoryCorner = InventoryCorner.TOP_RIGHT,
+    var scrollDownInventoryCorner: InventoryCorner = InventoryCorner.BOTTOM_RIGHT,
+    var scrollSound: Sound? = null,
+    var cannotScrollSound: Sound? = null,
+    var isResetOnClose: Boolean = true
+) : MenuListener(plugin), GenericMenu {
+    var lineScrolledOnScroll: Int = lineScrolledOnScroll
+    set(value) {
+        require(value > 0) { "Cannot scroll a negative amount of lines!" }
+        field = value
+    }
+    final override val inventory: Inventory = Bukkit.createInventory(null, size, name)
     private var scrollUpItem: ItemStack? = null
     private var scrollDownItem: ItemStack? = null
-    var scrollUpInventoryCorner: InventoryCorner
-    var scrollDownInventoryCorner: InventoryCorner
-    var scrollSound: Sound?
-    var cannotScrollSound: Sound?
-    var isResetOnClose: Boolean
-    private var lineWeAreOn: Int
+    private var lineWeAreOn: Int = 0
 
     init {
-        inventory = Bukkit.createInventory(null, size, name)
-        this.parent = parent
-        require(lineScrolledOnScroll >= 0) { "The line scrolled on scroll needs to be a number bigger than 0!" }
-        this.lineScrolledOnScroll = lineScrolledOnScroll
-        this.items = items ?: HashMap()
-        require(scrollDownInventoryCorner.ordinal != scrollUpInventoryCorner.ordinal) { "The corner of the scroll down and scroll up item cannot be the same!" }
+        require(lineScrolledOnScroll > 0) { "The line scrolled on scroll needs to be a number bigger than 0!" }
+        require(scrollDownInventoryCorner != scrollUpInventoryCorner) { "The corner of the scroll down and scroll up item cannot be the same!" }
         if (size == 9) {
             require(
-                !(scrollDownInventoryCorner.name.lowercase(Locale.getDefault()).contains("right")
-                        && scrollUpInventoryCorner.name.lowercase(Locale.getDefault()).contains("right"))
+                !(scrollDownInventoryCorner.name.lowercase().contains("right")
+                        && scrollUpInventoryCorner.name.lowercase().contains("right"))
             ) { "When the inventory size is 9 (only one layer), the scroll items must be in opposites sides." }
             require(
-                !(scrollDownInventoryCorner.name.lowercase(Locale.getDefault()).contains("left")
-                        && scrollUpInventoryCorner.name.lowercase(Locale.getDefault()).contains("left"))
+                !(scrollDownInventoryCorner.name.lowercase().contains("left")
+                        && scrollUpInventoryCorner.name.lowercase().contains("left"))
             ) { "When the inventory size is 9 (only one layer), the scroll items must be in opposites sides." }
         }
-        this.scrollUpInventoryCorner = scrollUpInventoryCorner
-        this.scrollDownInventoryCorner = scrollDownInventoryCorner
-        this.scrollSound = scrollSound
-        this.cannotScrollSound = cannotScrollSound
-        this.scrollMaterial = scrollMaterial
-        isResetOnClose = resetOnClose
-        lineWeAreOn = 0
         updateButtons()
     }
 
-    override fun addItem(index: Int, item: MenuItem) {
+    fun addItem(index: Int, item: MenuItem) {
         items[index] = item
         updateInventory()
     }
@@ -167,7 +150,8 @@ abstract class ScrollingMenu @JvmOverloads constructor(
         }
         if (parent != null) Bukkit.getScheduler().runTaskLater(
             plugin,
-            { event.player.openInventory(parent!!.inventory) }, 1)
+            { event.player.openInventory(parent!!.inventory) },
+            1)
 
     }
 
@@ -240,9 +224,11 @@ abstract class ScrollingMenu @JvmOverloads constructor(
 
     private fun updateButtons() {
         val displayNameUp =
-            if (remainingScrollAmount(ScrollDirection.UP) > 0) ChatColor.YELLOW.toString() + "Scroll Up" else ChatColor.GRAY.toString() + "Cannot Scroll Up!"
+            if (remainingScrollAmount(ScrollDirection.UP) > 0) ChatColor.YELLOW.toString() + "Scroll Up"
+            else ChatColor.GRAY.toString() + "Cannot Scroll Up!"
         val displayNameDown =
-            if (remainingScrollAmount(ScrollDirection.DOWN) > 0) ChatColor.YELLOW.toString() + "Scroll Down" else ChatColor.GRAY.toString() + "Cannot Scroll Down!"
+            if (remainingScrollAmount(ScrollDirection.DOWN) > 0) ChatColor.YELLOW.toString() + "Scroll Down"
+            else ChatColor.GRAY.toString() + "Cannot Scroll Down!"
         scrollUpItem = ItemBuilder(scrollMaterial).setDisplayName(displayNameUp).getItem()
         scrollDownItem = ItemBuilder(scrollMaterial).setDisplayName(displayNameDown).getItem()
     }
