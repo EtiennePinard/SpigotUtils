@@ -2,7 +2,7 @@ package com.ejrp.spigotutils.menuUtils
 
 import org.bukkit.inventory.Inventory
 
-interface GenericMenu : GenericMenuListener {
+interface GenericMenu {
     /**
      * Gets the inventory
      * @return The inventory

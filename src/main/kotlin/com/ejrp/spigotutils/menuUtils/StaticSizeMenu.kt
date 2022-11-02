@@ -11,26 +11,23 @@ import org.bukkit.plugin.java.JavaPlugin
  * This class has one field, a final MenuItem array. It is an
  * array because the size of this menu will not change.
  * Extend this class to create your own custom static menus.
+ * @param plugin The plugin to register the listeners to.
+ * @param name The name of the inventory.
+ * @param size The size of the inventory.
+ * @param owner The owner of the inventory, null of there is no owner.
+ * @param items The items in this inventory.
  */
-abstract class StaticSizeMenu : MenuListener {
-    /**
-     * Gets the item of this inventory.
-     * @return The item of this inventory
-     */
+abstract class StaticSizeMenu(
+    plugin: JavaPlugin,
+    name: String,
+    size: Int,
+    owner: InventoryHolder?,
     val items: Array<MenuItem?>
-    final override val inventory: Inventory
+) : MenuListener(plugin), GenericMenu {
+    final override val inventory: Inventory = Bukkit.createInventory(owner, size, name)
 
-    /**
-     * Creates a new StaticSizeMenu object with the given parameters.
-     * @param plugin The plugin to register the listeners to.
-     * @param name The name of the inventory.
-     * @param size The size of the inventory.
-     * @param owner The owner of the inventory, null of there is no owner.
-     * @param items The items in this inventory.
-     */
-    constructor(plugin: JavaPlugin, name: String, size: Int, owner: InventoryHolder?, items: Array<MenuItem?>) : super(plugin) {
-        inventory = Bukkit.createInventory(owner, size, name)
-        this.items = items
+    init {
+        require(items.size == size) { "The item array size needs to be the same size as the inventory" }
     }
 
     /**
@@ -47,9 +44,7 @@ abstract class StaticSizeMenu : MenuListener {
         size: Int,
         owner: InventoryHolder?,
         items: Map<Int, MenuItem>
-    ) : super(plugin) {
-        inventory = Bukkit.createInventory(owner, size, name)
-        this.items = arrayOfNulls(size)
+    ) : this(plugin, name, size, owner, arrayOfNulls(size)) {
         items.forEach { (index: Int, item: MenuItem) -> addItem(index, item) }
     }
 

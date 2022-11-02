@@ -16,7 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin
  * @param plugin The plugin to register the listeners too.
  */
 
-abstract class MenuListener(final override val plugin: JavaPlugin) : GenericMenu {
+abstract class MenuListener(final override val plugin: JavaPlugin) : GenericMenuListener {
 
     init {
         plugin.server.pluginManager.registerEvents(MenuListenerRegister(this), plugin)
